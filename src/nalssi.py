@@ -90,8 +90,8 @@ def condition_hourly(location):
     # 
 
     # 현재 시간과 날짜
-    now_hour = _time[:2]
-    now_day = _dd
+    now_hour = int(_time[:2])
+    now_day = int(_dd)
 
     # 
     # Hourly
