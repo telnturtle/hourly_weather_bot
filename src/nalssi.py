@@ -47,8 +47,10 @@ def condition_hourly(location):
     else: 
         hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
 
+    # 
     # Condition
-    
+    # 
+
     # Full location
     _full_loc = condition_data['current_observation']['display_location']['full']
     
@@ -83,34 +85,36 @@ def condition_hourly(location):
     _relat_hum = condition_data['current_observation']['relative_humidity']
     
     _ret = '{}, {} {}\n{} {}°C {} RH {}\n'.format(_full_loc, _day_of_the_week, _dd, _time, _temp_c, _weat, _relat_hum)
+    
+    # 
+    # 
 
+    # 현재 시간과 날짜
+    now_hour = _time[:2]
+    now_day = _dd
+
+    # 
     # Hourly
+    # 
 
     # Wunderground API가 뻗어있다면 None을 돌려받는다.
     if hourly_data is None:
         return _ret
     
-    # hourly_initial_time + time_interval x _limit 시간 뒤까지 예보한다
-    _limit = 7 # hourly는 _limit개 줄로 나타냄
+    # hourly_initial_time + time_interval x _count 시간 뒤까지 예보한다
+    _count = 7 # hourly는 _count개 줄로 나타냄
     time_interval = 2
     hourly_initial_time = 1
-    
-    # 카운트를 _limit 까지 올린다
-    _count = 0
     
     # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
     _next_day_first = True
 
-    # 현재 시간과 날짜
-    now_hour = datetime.now().hour
-    now_day = datetime.now().day
-
-    # _ret에 _limit개 줄을 추가한다
+    # _ret에 _count개 줄을 추가한다
     for hourly in hourly_data['hourly_forecast']:
         _hour = str(int(hourly['FCTTIME']['hour']))             # 시간
         _mday = int(hourly['FCTTIME']['mday'])                  # 날짜
         _weekday = hourly['FCTTIME']['weekday_name_abbrev']     # 요일
-        _epoch = int(hourly['FCTTIME']['epoch'])                # 유닉스타임
+        _epoch = int(hourly['FCTTIME']['epoch'])                # 유닉스타임 # GMT
         _cel = _round(hourly['temp']['metric'])                 # 섭씨
         _cond = hourly['condition']                             # 컨디션
         
@@ -119,7 +123,6 @@ def condition_hourly(location):
             continue
         
         # 현재 시간보다 이전의 정보를 표시하지 않는다
-        # if _epoch + 100 < int(datetime.now().timestamp()): # datetime.datetime.now().timestamp()는 Python 3 에서.
         if _epoch + 100 < int(time.time()):
             continue
 
@@ -135,10 +138,10 @@ def condition_hourly(location):
         # 결과 텍스트에 한 줄을 추가한다
         _ret += '{}시 {}°C{}\n'.format(_hour, _cel, ___cond)
         
-        _count += 1
+        _count -= 1
         
         # 줄 수 제한
-        if _count == _limit:
+        if _count == 0:
             break
     
     return _ret
