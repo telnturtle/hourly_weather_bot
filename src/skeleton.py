@@ -20,7 +20,7 @@ def main():
         time_diff_limit = 60
         text = msg['text']
 
-        if content_type == 'text' and time_diff_limit > time_diff:
+        if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
             payload = hourly_for_telegram.make_payload(chat_id, text)
             
             bot.sendMessage(chat_id, payload)
