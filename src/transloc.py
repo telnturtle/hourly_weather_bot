@@ -73,7 +73,11 @@ def si_gun(location):
         if _result["response"]["status"] == "NOT_FOUND": return None
         else:
             _s = _result["response"]["refined"]["structure"]
-            if _s["level1"][-1] == "도":
+
+            # 경기광주 따로 처리
+            if _s['level1'] == '경기도' and _s['level2'] == '광주시':
+                result = '경기광주'
+            elif _s["level1"][-1] == "도":
                 _temp = list(_s["level2"].split()[0])
                 result = "".join(list(filter((lambda c: c != "시" and c != "군"), _temp)))
             else: # level1이 "시"로 끝나면
