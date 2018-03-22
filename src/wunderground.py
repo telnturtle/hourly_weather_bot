@@ -164,7 +164,9 @@ def hourly(location, is_korean=False):
     # 리퀘스트 넣고 데이터를 json으로 로드한다
     response = requests.get(url=url)
     try: data = json.loads(response.text)
-    except: return None
+    except Exception as e:
+        print(e) # 디버깅좀
+        return None
     
     # data_hourly 딕셔너리에 저장한다
     data_hourly[location] = data
