@@ -64,6 +64,9 @@ def condition_hourly(location):
     try: _dd = int(___temp[1])
     except Exception as e: _dd = ''
     
+    conditions_m = datetime.fromtimestamp(int(condition_data['current_observation']['observation_epoch'])).month
+    conditions_y = datetime.fromtimestamp(int(condition_data['current_observation']['observation_epoch'])).year
+    
     # Time
     try: _time = ___temp[4][:5]
     except: _time = "error"
@@ -92,6 +95,7 @@ def condition_hourly(location):
     # 현재 시간과 날짜
     now_hour = int(_time[:2])
     now_day = int(_dd)
+    now_ymd = datetime(year=conditions_y, month=conditions_m, day=now_day)
 
     # 
     # Hourly
@@ -113,6 +117,8 @@ def condition_hourly(location):
     for hourly in hourly_data['hourly_forecast']:
         _hour = str(int(hourly['FCTTIME']['hour']))             # 시간
         _mday = int(hourly['FCTTIME']['mday'])                  # 날짜
+        _mon = int(hourly['FCTTIME']['mon'])
+        _year = int(hourly['FCTTIME']['year'])
         _weekday = hourly['FCTTIME']['weekday_name_abbrev']     # 요일
         _epoch = int(hourly['FCTTIME']['epoch'])                # 유닉스타임 # GMT
         _cel = _round(hourly['temp']['metric'])                 # 섭씨
@@ -127,7 +133,7 @@ def condition_hourly(location):
             continue
 
         # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
-        if _next_day_first and _mday == now_day + 1:
+        if _next_day_first and datetime(year=_year, month=_mon, day=_mday) == now_ymd + timedelta(days=1):
             _hour = '{} {}\n{}'.format(_weekday, _mday, _hour)
             _next_day_first = False
         
