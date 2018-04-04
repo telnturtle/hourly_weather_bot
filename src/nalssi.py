@@ -105,10 +105,10 @@ def condition_hourly(location):
     if hourly_data is None:
         return _ret
     
-    # hourly_initial_time + time_interval x _count 시간 뒤까지 예보한다
+    # hourly_initial_time + time_interval x (_count-1) 시간 뒤까지 예보한다
     _count = 7 # hourly는 _count개 줄로 나타냄
     time_interval = 2
-    hourly_initial_time = 1
+    hourly_initial_time = 2
     
     # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
     _next_day_first = True
