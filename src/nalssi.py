@@ -98,6 +98,18 @@ def condition_hourly(location):
     now_ymd = datetime(year=conditions_y, month=conditions_m, day=now_day)
 
     # 
+    # Hourly가 자꾸 생략되거나 줄어드는 문제로 디버깅하려고
+    # 
+    _filename = str(datetime.now().strftime('%Y%m%dT%H%M%S.%f')) + 'L' + str(location) + '.json'
+    
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', '__debug', '_log', _filename), 'w', encoding='utf-8') as make_file:
+            json.dump(hourly_data, make_file, ensure_ascii=False, indent='\t')
+    except Exception as e:
+        print("Error at condition_hourly({})".format(location))
+        print(e)
+
+    # 
     # Hourly
     # 
 
@@ -149,7 +161,7 @@ def condition_hourly(location):
         # 줄 수 제한
         if _count == 0:
             break
-    
+
     return _ret
 
 
