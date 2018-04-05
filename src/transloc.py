@@ -8,6 +8,8 @@ import time
 import os
 import traceback
 
+import loggingmod
+
 
 # Init
 
@@ -84,5 +86,5 @@ def si_gun(location):
                 result = _s["level1"][:2] # level1 -> "서울특별시", "대전광역시"
             return result
     except Exception as e:
-        print("Error at si_gun({})".format(location))
+        loggingmod.logger.warning("Error at si_gun({})".format(location))
         return None

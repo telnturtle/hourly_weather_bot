@@ -13,6 +13,8 @@ def main():
 
     from src import hourly_for_telegram
 
+    import loggingmod
+
 
     def handle(msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
@@ -24,13 +26,11 @@ def main():
             payload = hourly_for_telegram.make_payload(chat_id, text)
             
             bot.sendMessage(chat_id, payload)
-            print('\n')
-            print('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
+            loggingmod.logger.info('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
                 chat_id, 
                 datetime.datetime.now().isoformat(' ')[:19],
                 (datetime.datetime.now() + timedelta(hours=9)).isoformat(' ')[:19], 
                 payload))
-            print('\n')
     
 
     with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'rsc', '_keys', 'keys'), 'r') as f:
@@ -38,7 +38,7 @@ def main():
     
     bot = telepot.Bot(TOKEN)
     MessageLoop(bot, handle).run_as_thread()
-    print('Listening ...')
+    loggingmod.logger.info('Listening ...')
 
     # Keep the program running.
     while 1:

@@ -8,6 +8,7 @@ import traceback
 
 import wunderground
 import transloc
+import loggingmod
 
 
 def condition_hourly(location):
@@ -106,8 +107,8 @@ def condition_hourly(location):
         with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', '__debug', '_log', _filename), 'w', encoding='utf-8') as make_file:
             json.dump(hourly_data, make_file, ensure_ascii=False, indent='\t')
     except Exception as e:
-        print("Error at condition_hourly({})".format(location))
-        print(e)
+        loggingmod.logger.warning("Error at condition_hourly({})".format(location))
+        loggingmod.logger.warning(e)
 
     # 
     # Hourly
@@ -236,7 +237,7 @@ def condition_forecast(location):
         _fcttext_metric = forecast_data['forecast']['txt_forecast']['forecastday'][0]['fcttext_metric']
         _ret += _fcttext_metric
     except Exception as e:
-        traceback.print_exc()
+        loggingmod.logger.warning(e)
         # TODO: try-except 없애기
     
     return _ret
