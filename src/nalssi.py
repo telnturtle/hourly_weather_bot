@@ -101,7 +101,7 @@ def condition_hourly(location):
     # 
     # Hourly가 자꾸 생략되거나 줄어드는 문제로 디버깅하려고
     # 
-    _filename = str(datetime.now().strftime('%Y%m%dT%H%M%S.%f')) + 'L' + str(location) + '.json'
+    _filename = str(datetime.now().strftime('%Y%m%dT%H%M%S.%f')) + 'L' + str(transed_location) + '.json'
     
     try:
         with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', '__debug', '_log', _filename), 'w', encoding='utf-8') as make_file:
