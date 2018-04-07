@@ -138,7 +138,7 @@ def condition_hourly(location):
         _cond = hourly['condition']                             # 컨디션
         
         # time_interval 시간 간격에 맞춰 나타낸다
-        if (int(_hour) - now_hour) % time_interval == hourly_initial_time:
+        if (int(_hour) - now_hour) % time_interval != hourly_initial_time % time_interval:
             continue
         
         # 현재 시간보다 이전의 정보를 표시하지 않는다
