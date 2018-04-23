@@ -23,7 +23,11 @@ def main():
         text = msg['text']
 
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
-            payload = hourly_for_telegram.make_payload(chat_id, text)
+            try:
+                payload = hourly_for_telegram.make_payload(chat_id, text)
+            except Exception as e:
+                payload = 'Sorry, an error occurred. Please try again later.'
+                loggingmod.logger.error(e, exc_info=True)
             
             bot.sendMessage(chat_id, payload)
             loggingmod.logger.info('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
@@ -37,8 +41,19 @@ def main():
         TOKEN = f.readlines()[9][:-1]
     
     bot = telepot.Bot(TOKEN)
-    MessageLoop(bot, handle).run_as_thread()
-    loggingmod.logger.info('Listening ...')
+    _count = 5
+    while 1:
+        try:
+            MessageLoop(bot, handle).run_as_thread()
+            loggingmod.logger.info('Listening ...')
+            while 1:
+                time.sleep(5)
+        except Exception as e:
+            loggingmod.logger.error(e, exc_info=True)
+
+        _count = _count - 1
+        if _count < 1: break
+        
 
     # Keep the program running.
     while 1:

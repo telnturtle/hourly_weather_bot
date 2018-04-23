@@ -125,6 +125,7 @@ def hourly(location, is_korean=False):
             # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
             if location in data_hourly:
                 if data_hourly[location]:
+                    loggingmod.logger.debug("time_now: {}\ntime_wun_called[{}]: {}\ndiff: {}".format(time_now, location, time_wun_called[location], time_now - time_wun_called[location]))
                     return data_hourly[location]
 
     # URL에 location 삽입
