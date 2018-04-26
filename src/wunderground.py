@@ -28,9 +28,9 @@ url_hourly = url_hourly.format(_key, '{}')
 url_forecast = url_forecast.format(_key, '{}')
 
 # 위치를 키로 가지는 날씨 데이터를 저장하는 딕셔너리
-data_condition = dict()
-data_hourly = dict()
-data_forecast = dict()
+#data_condition = dict()
+#data_hourly = dict()
+#data_forecast = dict()
 
 # Wunderground의 무료 플랜은 1분에 10, 24시간에 500 이하로만 콜해야 한다
 # int 유닉스타임
@@ -39,7 +39,7 @@ call_per_minute = queue.Queue(10)
 call_per_24h = queue.Queue(500)
 
 # Wunderground에 location으로 쿼리를 넣은 시간을 int 유닉스타임으로 저장한다
-time_wun_called = dict()
+# time_wun_called = dict()
 
 
 def condition(location, is_korean=False):
@@ -51,15 +51,15 @@ def condition(location, is_korean=False):
     
     # 같은 위치로 부른 간격이 minimum interval(초)이 되지 않았다면
     # 데이터를 새로 갱신하지 않고, 이전걸 그대로 사용한다
-    minimum_interval_sec = 1*60*60
-
-    if location in time_wun_called:
-        if time_now - time_wun_called[location] < minimum_interval_sec:
-            # data_condition에 location으로 
-            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
-            if location in data_condition:
-                if data_condition[location]:
-                    return data_condition[location]
+#    minimum_interval_sec = 1*60*60
+#
+#    if location in time_wun_called:
+#        if time_now - time_wun_called[location] < minimum_interval_sec:
+#            # data_condition에 location으로 
+#            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
+#            if location in data_condition:
+#                if data_condition[location]:
+#                    return data_condition[location]
 
     # URL에 location 삽입
     if is_korean: url = url_conditions_korea.format(location)
@@ -96,7 +96,7 @@ def condition(location, is_korean=False):
     call_per_minute.put_nowait(time_now)
     call_per_24h.put_nowait(time_now)
     
-    time_wun_called[location] = time_now
+#    time_wun_called[location] = time_now
     
     # 리퀘스트 넣고 데이터를 json으로 로드한다
     response = requests.get(url=url)
@@ -104,7 +104,7 @@ def condition(location, is_korean=False):
     except: return None
     
     # data_condition 딕셔너리에 저장한다
-    data_condition[location] = data
+#    data_condition[location] = data
     
     return data
 
@@ -117,16 +117,16 @@ def hourly(location, is_korean=False):
 
     # 같은 위치로 부른 간격이 minimum interval(초)이 되지 않았다면
     # 데이터를 새로 갱신하지 않고, 이전걸 그대로 사용한다
-    minimum_interval_sec = 1*60*60
-    
-    if location in time_wun_called:
-        if time_now - time_wun_called[location] < minimum_interval_sec:
-            # data_hourly에 location으로 
-            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
-            if location in data_hourly:
-                if data_hourly[location]:
-                    loggingmod.logger.debug("time_now: {}\ntime_wun_called[{}]: {}\ndiff: {}".format(time_now, location, time_wun_called[location], time_now - time_wun_called[location]))
-                    return data_hourly[location]
+#    minimum_interval_sec = 1*60*60
+#    
+#    if location in time_wun_called:
+#        if time_now - time_wun_called[location] < minimum_interval_sec:
+#            # data_hourly에 location으로 
+#            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
+#            if location in data_hourly:
+#                if data_hourly[location]:
+#                    loggingmod.logger.debug("time_now: {}\ntime_wun_called[{}]: {}\ndiff: {}".format(time_now, location, time_wun_called[location], time_now - time_wun_called[location]))
+#                    return data_hourly[location]
 
     # URL에 location 삽입
     url = url_hourly.format(location)
@@ -162,7 +162,7 @@ def hourly(location, is_korean=False):
     call_per_minute.put_nowait(time_now)
     call_per_24h.put_nowait(time_now)
     
-    time_wun_called[location] = time_now
+#    time_wun_called[location] = time_now
 
     # 리퀘스트 넣고 데이터를 json으로 로드한다
     response = requests.get(url=url)
@@ -172,7 +172,7 @@ def hourly(location, is_korean=False):
         return None
     
     # data_hourly 딕셔너리에 저장한다
-    data_hourly[location] = data
+#    data_hourly[location] = data
     
     return data
 
@@ -186,15 +186,15 @@ def forecast(self, location):
 
     # 같은 위치로 부른 간격이 minimum interval(초)이 되지 않았다면
     # 데이터를 새로 갱신하지 않고, 이전걸 그대로 사용한다
-    minimum_interval_sec = 1*60*60
-    
-    if location in time_wun_called:
-        if time_now - time_wun_called[location] < minimum_interval_sec:
-            # data_forecast에 location으로 
-            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
-            if location in data_forecast:
-                if data_forecast[location]:
-                    return data_forecast[location]
+#    minimum_interval_sec = 1*60*60
+#    
+#    if location in time_wun_called:
+#        if time_now - time_wun_called[location] < minimum_interval_sec:
+#            # data_forecast에 location으로 
+#            # None이 아닌 데이터가 들어있어야 이전 데이터를 리턴할 수 있다. 
+#            if location in data_forecast:
+#                if data_forecast[location]:
+#                    return data_forecast[location]
 
     # URL에 location 삽입
     url = url_forecast.format(location)
@@ -230,7 +230,7 @@ def forecast(self, location):
     call_per_minute.put_nowait(time_now)
     call_per_24h.put_nowait(time_now)
     
-    time_wun_called[location] = time_now
+#    time_wun_called[location] = time_now
     
     # 리퀘스트 넣고 데이터를 json으로 로드한다
     response = requests.get(url=url)
@@ -238,6 +238,6 @@ def forecast(self, location):
     except: return None
     
     # data_forecast 딕셔너리에 저장한다
-    data_forecast[location] = data
+#    data_forecast[location] = data
     
     return data
