@@ -116,7 +116,7 @@ def condition_hourly(location):
 
     # Wunderground API가 뻗어있다면 None을 돌려받는다.
     if hourly_data is None:
-        loggingmod.logger.debug("hourly_data is None")
+        loggingmod.logger.info("hourly_data is None")
         return _ret
     
     # hourly_initial_time + time_interval x (_count-1) 시간 뒤까지 예보한다
@@ -129,7 +129,7 @@ def condition_hourly(location):
 
     # _ret에 _count개 줄을 추가한다
     for hourly in hourly_data['hourly_forecast']:
-        _hour = str(int(hourly['FCTTIME']['hour']))             # 시간
+        _hour = ('0'+str(int(hourly['FCTTIME']['hour'])))[-2:]  # 시간
         _mday = int(hourly['FCTTIME']['mday'])                  # 날짜
         _mon = int(hourly['FCTTIME']['mon'])
         _year = int(hourly['FCTTIME']['year'])
@@ -140,12 +140,12 @@ def condition_hourly(location):
         
         # time_interval 시간 간격에 맞춰 나타낸다
         if (int(_hour) - now_hour) % time_interval != hourly_initial_time % time_interval:
-            loggingmod.logger.debug('_hour = {}: Time interval: continue'.format(_hour))
+            loggingmod.logger.info('_hour = {}: Time interval: continue'.format(_hour))
             continue
         
         # 현재 시간보다 이전의 정보를 표시하지 않는다
         if _epoch + 100 < int(time.time()):
-            loggingmod.logger.debug('_hour = {}: epoch < now'.format(_hour))
+            loggingmod.logger.info('_hour = {}: epoch < now'.format(_hour))
             continue
 
         # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
@@ -158,7 +158,7 @@ def condition_hourly(location):
         _prev_cond = _cond
         
         # 결과 텍스트에 한 줄을 추가한다
-        _ret += '{}시 {}°C{}\n'.format(_hour, _cel, ___cond)
+        _ret += '{} {}°C{}\n'.format(_hour, _cel, ___cond)
         
         _count -= 1
         
