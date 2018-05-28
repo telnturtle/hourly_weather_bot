@@ -53,6 +53,7 @@ You can use the previous location by entering a period. e.g.
 /start
 /help
 /command
+/about
 '''
 
     def about_msg():
