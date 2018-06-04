@@ -27,26 +27,33 @@ def condition_hourly(location):
     condition_data = wunderground.condition(transed_location, is_korean=location_is_korean)
     hourly_data = None
 
-    # Wunderground API가 뻗어있다면 None을 돌려받는다.
-    if condition_data is None:
-        return '{}, {} {}\n{} {}°C {} RH {}\n'.format('', '', '', '', '', '', '')
-    
-    elif type(condition_data) == dict:
-        # 위치가 영어이며 찾지 못하는 곳이라면
-        if 'error' in condition_data['response']:
-            return 'City Not Found\n\nThe search for "{}" did not return any results.'.format(location)
-    
-        # 위치를 찾았으며 리스트 결과를 돌려받았다면
-        elif 'results' in condition_data['response']:
-            new_location = 'zmw:' + condition_data["response"]["results"][0]['zmw']
-            condition_data = wunderground.condition(new_location, is_korean=False)
-            hourly_data = wunderground.hourly(new_location, is_korean=False)
+    _hourly_call = 4
+    while _hourly_call > 0:
+        # Wunderground API가 뻗어있다면 None을 돌려받는다.
+        if condition_data is None:
+            return '{}, {} {}\n{} {}°C {} RH {}\n'.format('', '', '', '', '', '', '')
         
-        else:
+        elif type(condition_data) == dict:
+            # 위치가 영어이며 찾지 못하는 곳이라면
+            if 'error' in condition_data['response']:
+                return 'City Not Found\n\nThe search for "{}" did not return any results.'.format(location)
+        
+            # 위치를 찾았으며 리스트 결과를 돌려받았다면
+            elif 'results' in condition_data['response']:
+                new_location = 'zmw:' + condition_data["response"]["results"][0]['zmw']
+                condition_data = wunderground.condition(new_location, is_korean=False)
+                hourly_data = wunderground.hourly(new_location, is_korean=False)
+            
+            else:
+                hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
+        
+        else: 
             hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
-    
-    else: 
-        hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
+
+        _hourly_call = _hourly_call - 1
+        if hourly_data["hourly_forecast"]:  break
+
+    del _hourly_call
 
     # 
     # Condition

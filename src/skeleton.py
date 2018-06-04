@@ -39,7 +39,7 @@ You can use the previous location by entering a period. e.g.
 위치로 지역 이름을 입력하면 해당 예보를 출력합니다.
 예) 서울
     판암역
-    수원 장안동
+    인천 논현동
     경북대
     첨단동
 
