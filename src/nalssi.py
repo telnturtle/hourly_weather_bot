@@ -127,8 +127,8 @@ def condition_hourly(location):
         return _ret
     
     # hourly_initial_time + time_interval x (_count-1) 시간 뒤까지 예보한다
-    _count = 7 # hourly는 _count개 줄로 나타냄
-    time_interval = 2
+    _count = 6 # hourly는 _count개 줄로 나타냄
+    time_interval = 4
     hourly_initial_time = 2
     
     # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
@@ -145,13 +145,16 @@ def condition_hourly(location):
         _cel = _round(hourly['temp']['metric'])                 # 섭씨
         _cond = hourly['condition']                             # 컨디션
         
-        # time_interval 시간 간격에 맞춰 나타낸다
-        if (int(_hour) - now_hour) % time_interval != hourly_initial_time % time_interval:
+        # 0, 4, 8, 12, 16, 20시 -> 가 아니라면 배제
+        if not int(_hour) % time_interval == 0:
             loggingmod.logger.info('_hour = {}: Time interval: continue'.format(_hour))
             continue
         
-        # 현재 시간보다 이전의 정보를 표시하지 않는다
-        if _epoch + 100 < int(time.time()):
+        # 현재 시간보다 이전 -> 배제
+        # 현재보다 1시간01분 이후가 아니라면 -> 배제
+#         if not int(_hour) % 24 >= (now_hour + hourly_initial_time) % 24:
+#             continue
+        if _epoch + 100 < int(time.time()) + 60*60*(hourly_initial_time) + 60:
             loggingmod.logger.info('_hour = {}: epoch < now'.format(_hour))
             continue
 
