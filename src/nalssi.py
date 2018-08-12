@@ -12,52 +12,49 @@ import loggingmod
 
 
 def condition_hourly(location):
-    '''Condition + hourly, 앞으로 14시간동안 상태를 두시간 간격으로 나타낸다'''
-    # 한국어 위치를 시군 단위의 영어 이름으로 바꾼다. 영어 단어면 바꾸지 않는다.
+    '''Condition + hourly, 8 lines of [0, 6, 9, 12, 15, 18, 21] o clock'''
+    # if koeran then english si / gun else id
     transed_location = transloc.translate(location)
 
-    # 위치가 한국어라면
-    location_is_korean = transloc.is_korean(location)
+    is_loc_kor = transloc.is_korean(location)
 
-    # 위치가 한국어이며 찾지 못하는 곳이라면
-    if location_is_korean and transed_location == None:
+    # location is korean and cannot found then
+    if is_loc_kor and transed_location == None:
         return '위치({})를 찾을 수 없습니다.'.format(location)
 
-    # 날씨 json을 갱신하고 저장하고 가져온다
-    condition_data = wunderground.condition(transed_location, is_korean=location_is_korean)
+    # get condition and hourly data
+    condition_data = wunderground.condition(transed_location, is_korean=is_loc_kor)
     hourly_data = None
 
     _hourly_call = 4
     while _hourly_call > 0:
-        # Wunderground API가 뻗어있다면 None을 돌려받는다.
+        # None if Wunderground API dead
         if condition_data is None:
             return '{}, {} {}\n{} {}°C {} RH {}\n'.format('', '', '', '', '', '', '')
         
         elif type(condition_data) == dict:
-            # 위치가 영어이며 찾지 못하는 곳이라면
+            # location is english and cannot found then
             if 'error' in condition_data['response']:
                 return 'City Not Found\n\nThe search for "{}" did not return any results.'.format(location)
         
-            # 위치를 찾았으며 리스트 결과를 돌려받았다면
+            # if result is list
             elif 'results' in condition_data['response']:
                 new_location = 'zmw:' + condition_data["response"]["results"][0]['zmw']
                 condition_data = wunderground.condition(new_location, is_korean=False)
                 hourly_data = wunderground.hourly(new_location, is_korean=False)
             
             else:
-                hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
+                hourly_data = wunderground.hourly(transed_location, is_korean=is_loc_kor)
         
         else: 
-            hourly_data = wunderground.hourly(transed_location, is_korean=location_is_korean)
+            hourly_data = wunderground.hourly(transed_location, is_korean=is_loc_kor)
 
         _hourly_call = _hourly_call - 1
         if hourly_data["hourly_forecast"]:  break
 
     del _hourly_call
 
-    # 
-    # Condition
-    # 
+    ##### condition
 
     # Full location
     _full_loc = condition_data['current_observation']['display_location']['full']
@@ -65,8 +62,8 @@ def condition_hourly(location):
     ___temp =  condition_data['current_observation']['observation_time_rfc822'].split(' ') # Three underscores
     
     # Day of the week
-    try: _day_of_the_week = ___temp[0][:-1]
-    except Exception as e: _day_of_the_week = ''
+    try: _wd = ___temp[0][:-1]
+    except Exception as e: _wd = ''
     
     # Day
     try: _dd = int(___temp[1])
@@ -82,7 +79,7 @@ def condition_hourly(location):
     # Weather
     _weat = condition_data['current_observation']['weather']
     
-    # 바로 이전 줄에 표시한 컨디션을 저장한다
+    # store previous condition
     _prev_cond = _weat
     
     # Rounded Celsius
@@ -93,86 +90,66 @@ def condition_hourly(location):
     _temp_c = _round(condition_data['current_observation']['temp_c'])
     
     # Relative humidity
-    _relat_hum = condition_data['current_observation']['relative_humidity']
+    _rh = condition_data['current_observation']['relative_humidity']
     
-    _ret = '{}, {} {}\n{} {}°C {} RH {}\n'.format(_full_loc, _day_of_the_week, _dd, _time, _temp_c, _weat, _relat_hum)
+    # _ret = '{}, {} {}\n{} {}°C {} RH {}\n'.format(_full_loc, _wd, _dd, _time, _temp_c, _weat, _rh)
+    _ret = '{}, {}, {}\n{} {}°c {} RH {}\n'.format(_wd, _dd, _full_loc, _time, _temp_c, _weat, _rh)
     
-    # 
-    # 
-
-    # 현재 시간과 날짜
+    ##### for hourly
     now_hour = int(_time[:2])
     now_day = int(_dd)
     now_ymd = datetime(year=conditions_y, month=conditions_m, day=now_day)
+    cdcooe = int(condition_data['current_observation']['observation_epoch'])
 
-    # 
-    # Hourly가 자꾸 생략되거나 줄어드는 문제로 디버깅하려고
-    # 
-    _filename = str(datetime.now().strftime('%Y%m%dT%H%M%S.%f')) + 'L' + str(transed_location) + '.json'
-    
-    try:
-        with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', '__debug', '_log', _filename), 'w', encoding='utf-8') as make_file:
-            json.dump(hourly_data, make_file, ensure_ascii=False, indent='\t')
-    except Exception as e:
-        loggingmod.logger.warning("Error at condition_hourly({})".format(location))
-        loggingmod.logger.warning(e)
+    ##### hourly
 
-    # 
-    # Hourly
-    # 
-
-    # Wunderground API가 뻗어있다면 None을 돌려받는다.
+    # None if Wunderground API dead
     if hourly_data is None:
         loggingmod.logger.info("hourly_data is None")
         return _ret
     
-    # hourly_initial_time + time_interval x (_count-1) 시간 뒤까지 예보한다
-    _count = 6 # hourly는 _count개 줄로 나타냄
-    time_interval = 4
-    hourly_initial_time = 2
+    # _count lines hourly forecast
+    _count = 8
     
-    # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
+    # first next day -> write date and weekday
     _next_day_first = True
 
-    # _ret에 _count개 줄을 추가한다
+    # add _count lines to return text
     for hourly in hourly_data['hourly_forecast']:
-        _hour = ('0'+str(int(hourly['FCTTIME']['hour'])))[-2:]  # 시간
-        _mday = int(hourly['FCTTIME']['mday'])                  # 날짜
+        _hour = ('0'+str(int(hourly['FCTTIME']['hour'])))[-2:]  # hour
+        _mday = int(hourly['FCTTIME']['mday'])                  # month day
         _mon = int(hourly['FCTTIME']['mon'])
         _year = int(hourly['FCTTIME']['year'])
-        _weekday = hourly['FCTTIME']['weekday_name_abbrev']     # 요일
-        _epoch = int(hourly['FCTTIME']['epoch'])                # 유닉스타임 # GMT
-        _cel = _round(hourly['temp']['metric'])                 # 섭씨
-        _cond = hourly['condition']                             # 컨디션
+        _weekday = hourly['FCTTIME']['weekday_name_abbrev']     # weekday
+        _epoch = int(hourly['FCTTIME']['epoch'])                # unixtime UTC+0
+        _cel = _round(hourly['temp']['metric'])                 # celcious temp
+        _cond = hourly['condition']                             # condition
         
-        # 0, 4, 8, 12, 16, 20시 -> 가 아니라면 배제
-        if not int(_hour) % time_interval == 0:
+        # only 0, 6, 9, ..., 21 o clock
+        if not int(_hour) in [0,6,9,12,15,18,21]:
             loggingmod.logger.info('_hour = {}: Time interval: continue'.format(_hour))
             continue
         
-        # 현재 시간보다 이전 -> 배제
-        # 현재보다 1시간01분 이후가 아니라면 -> 배제
-#         if not int(_hour) % 24 >= (now_hour + hourly_initial_time) % 24:
-#             continue
-        if _epoch + 100 < int(time.time()) + 60*60*(hourly_initial_time) + 60:
+        # forecast must be 1 hour later than cdcooe
+        if _epoch < 3600 + cdcooe:
             loggingmod.logger.info('_hour = {}: epoch < now'.format(_hour))
             continue
 
-        # 처음으로 다음 날짜로 넘어가면 요일과 날짜를 나타낸다
+        # first next day -> write date and weekday
         if _next_day_first and datetime(year=_year, month=_mon, day=_mday) == now_ymd + timedelta(days=1):
             _hour = '{} {}\n{}'.format(_weekday, _mday, _hour)
             _next_day_first = False
-        
-        # 컨디션이 이전과 같다면 표시하지 않는다, 아니라면 앞에 공백 하나를 추가한다
+
+        # if condition is same as previous then don't write it else add a space before it
         ___cond = ' '+_cond if _cond != _prev_cond else ''
         _prev_cond = _cond
         
-        # 결과 텍스트에 한 줄을 추가한다
-        _ret += '{} {}°C{}\n'.format(_hour, _cel, ___cond)
+        # add to return text
+        _ret += '{} {}°c{}\n'.format(_hour, _cel, ___cond)
         
         _count -= 1
         
-        # 줄 수 제한
+        # line count
         if _count == 0:
             break
 
@@ -185,14 +162,14 @@ def condition_forecast(location):
     transed_location = transloc.translate(location)
 
     # 위치가 한국어라면
-    location_is_korean = transloc.is_korean(location)
+    is_loc_kor = transloc.is_korean(location)
 
     # 위치가 한국어이며 찾지 못하는 곳이라면
-    if location_is_korean and transed_location == None:
+    if is_loc_kor and transed_location == None:
         return '위치({})를 찾을 수 없습니다.'.format(location)
 
     # 날씨 json을 갱신하고 저장하고 가져온다
-    condition_data = wunderground.condition(transed_location, is_korean=location_is_korean)
+    condition_data = wunderground.condition(transed_location, is_korean=is_loc_kor)
 
     # Wunderground API가 뻗어있다면 None을 돌려받는다.
     if condition_data is None:
@@ -209,7 +186,7 @@ def condition_forecast(location):
         condition_data = wunderground.condition(new_location, is_korean=False)
         forecast_data = wunderground.forecast(new_location, is_korean=False)
     
-    else: forecast_data = wunderground.forecast(transed_location, is_korean=location_is_korean)
+    else: forecast_data = wunderground.forecast(transed_location, is_korean=is_loc_kor)
 
     # Condition
     
@@ -219,8 +196,8 @@ def condition_forecast(location):
     ___temp =  condition_data['current_observation']['observation_time_rfc822'].split(' ') # Three underscores
     
     # Day of the week
-    try: _day_of_the_week = ___temp[0][:-1]
-    except Exception as e: _day_of_the_week = ''
+    try: _wd = ___temp[0][:-1]
+    except Exception as e: _wd = ''
     
     # Day
     try: _dd = int(___temp[1])
@@ -241,9 +218,9 @@ def condition_forecast(location):
     _temp_c = _round(condition_data['current_observation']['temp_c'])
     
     # Relative humidity
-    _relat_hum = condition_data['current_observation']['relative_humidity']
+    _rh = condition_data['current_observation']['relative_humidity']
     
-    _ret = '{}, {} {}\n{} {} C {} RH {}\n'.format(_full_loc, _day_of_the_week, _dd, _time, _temp_c, _weat, _relat_hum)
+    _ret = '{}, {} {}\n{} {} C {} RH {}\n'.format(_full_loc, _wd, _dd, _time, _temp_c, _weat, _rh)
 
     # Forecast
     try:
