@@ -16,6 +16,7 @@ url_conditions_korea       = 'http://api.wunderground.com/api/{}/conditions/q/KR
 url_conditions_not_korea   = 'http://api.wunderground.com/api/{}/conditions/q/{}.json'
 url_hourly                 = 'http://api.wunderground.com/api/{}/hourly/q/{}.json'
 url_forecast               = 'http://api.wunderground.com/api/{}/forecast/q/{}.json'
+url_forecast10day          = 'http://api.wunderground.com/api/{}/forecast10day/q/{}}.json'
 
 # Wunderground API key
 with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'rsc', '_keys', 'keys'), 'r') as f:
@@ -26,6 +27,7 @@ url_conditions_korea = url_conditions_korea.format(_key, '{}')
 url_conditions_not_korea = url_conditions_not_korea.format(_key, '{}')
 url_hourly = url_hourly.format(_key, '{}')
 url_forecast = url_forecast.format(_key, '{}')
+url_forecast10day = url_forecast10day.format(_key, '{}')
 
 # 위치를 키로 가지는 날씨 데이터를 저장하는 딕셔너리
 #data_condition = dict()
@@ -239,5 +241,16 @@ def forecast(self, location):
     
     # data_forecast 딕셔너리에 저장한다
 #    data_forecast[location] = data
+    
+    return data
+
+
+def forecast10day(location):
+    '''http://api.wunderground.com/api/key/forecast10day/q/seoul.json'''
+    url = url_forecast10day.format(location)
+    
+    response = requests.get(url=url)
+    try: data = json.loads(response.text)
+    except: return None
     
     return data

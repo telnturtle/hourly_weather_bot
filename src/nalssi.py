@@ -55,51 +55,37 @@ def condition_hourly(location):
     del _hourly_call
 
     ##### condition
+    
+    cdco = condition_data['current_observation']
+    cd_co_otr_split =  cdco['observation_time_rfc822'].split(' ')
+    
+    conditions_m = datetime.fromtimestamp(int(cdco['observation_epoch'])).month
+    conditions_y = datetime.fromtimestamp(int(cdco['observation_epoch'])).year
 
-    # Full location
-    _full_loc = condition_data['current_observation']['display_location']['full']
+    loc_full = condition_data['current_observation']['display_location']['full'] # full location
+    day_week = cd_co_otr_split[0][:-1] # day of the week
+    dd = int(cd_co_otr_split[1]) # day
+    hhmm = cd_co_otr_split[4][:5] # time (hh:mm)
+    weather = cdco['weather'] # weather
+    _prev_cond = weather # store previous condition
+    temp_c = round(float(cdco['temp_c'])) # rounded celsius
+    rh = cdco['relative_humidity'] # relative humidity
+    tz = cdco['local_tz_short'] # timezone
+    feelslike = cdco['feelslike_c'] # feels like
+    precip = cdco['precip_today_metric'] # precip
+    uv = round(float(cdco['UV'])) # uv
     
-    ___temp =  condition_data['current_observation']['observation_time_rfc822'].split(' ') # Three underscores
-    
-    # Day of the week
-    try: _wd = ___temp[0][:-1]
-    except Exception as e: _wd = ''
-    
-    # Day
-    try: _dd = int(___temp[1])
-    except Exception as e: _dd = ''
-    
-    conditions_m = datetime.fromtimestamp(int(condition_data['current_observation']['observation_epoch'])).month
-    conditions_y = datetime.fromtimestamp(int(condition_data['current_observation']['observation_epoch'])).year
-    
-    # Time
-    try: _time = ___temp[4][:5]
-    except: _time = "error"
-    
-    # Weather
-    _weat = condition_data['current_observation']['weather']
-    
-    # store previous condition
-    _prev_cond = _weat
-    
-    # Rounded Celsius
-    # _round = lambda x: int(x + 0.5) if x >= 0 else int(x - 0.5)
-    def _round(x):
-        x = float(x)
-        return int(x + 0.5) if x >= 0 else int(x - 0.5)
-    _temp_c = _round(condition_data['current_observation']['temp_c'])
-    
-    # Relative humidity
-    _rh = condition_data['current_observation']['relative_humidity']
-    
-    # _ret = '{}, {} {}\n{} {}°C {} RH {}\n'.format(_full_loc, _wd, _dd, _time, _temp_c, _weat, _rh)
-    _ret = '{}, {}, {}\n{} {}°c {} RH {}\n'.format(_wd, _dd, _full_loc, _time, _temp_c, _weat, _rh)
+    # _ret = '{}, {} {}\n{} {}°C {} RH {}\n'.format(loc_full, day_week, dd, hhmm, temp_c, weather, rh)
+    # _ret = '{}, {}, {}\n{} {}°c {} RH {}\n'.format(day_week, dd, loc_full, hhmm, temp_c, weather, rh)
+    _ret = ('{} as of {} {}\n'.format(loc_full, hhmm, tz) +
+            '{}℃  {}  feels like {}℃\n'.format(temp_c, weather, feelslike) +
+            'precip {}㎜  RH {}%  UV Index {} of 10\n'.format(precip, rh, uv))
     
     ##### for hourly
-    now_hour = int(_time[:2])
-    now_day = int(_dd)
+    now_hour = int(hhmm[:2])
+    now_day = int(dd)
     now_ymd = datetime(year=conditions_y, month=conditions_m, day=now_day)
-    cdcooe = int(condition_data['current_observation']['observation_epoch'])
+    cdcooe = int(cdco['observation_epoch'])
 
     ##### hourly
 
@@ -193,18 +179,18 @@ def condition_forecast(location):
     # Full location
     _full_loc = condition_data['current_observation']['display_location']['full']
     
-    ___temp =  condition_data['current_observation']['observation_time_rfc822'].split(' ') # Three underscores
+    cd_co_otr_split =  condition_data['current_observation']['observation_time_rfc822'].split(' ') # Three underscores
     
     # Day of the week
-    try: _wd = ___temp[0][:-1]
+    try: _wd = cd_co_otr_split[0][:-1]
     except Exception as e: _wd = ''
     
     # Day
-    try: _dd = int(___temp[1])
+    try: _dd = int(cd_co_otr_split[1])
     except Exception as e: _dd = ''
     
     # Time
-    try: _time = ___temp[4][:5]
+    try: _time = cd_co_otr_split[4][:5]
     except: _time = "error"
     
     # Weather

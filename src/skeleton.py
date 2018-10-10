@@ -89,7 +89,13 @@ About...
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
             try:
                 payload = hourly_for_telegram.make_payload(chat_id, text)
-                payload = payload.replace('Rain', 'Rain☔' ).replace('Thunderstorm', 'Thunderstorm⛈').replace('Cloudy', 'Cloudy☁️').replace('Clouds', 'Clouds☁️').replace('Clear', 'Clear☀️').replace('Overcast', 'Overcast☁️')
+                payload = payload
+                    .replace('Rain', 'Rain☔' )
+                    .replace('Thunderstorm', 'Thunderstorm⛈')
+                    .replace('Cloudy', 'Cloudy☁️')
+                    .replace('Clouds', 'Clouds☁️')
+                    .replace('Clear', 'Clear☀️')
+                    .replace('Overcast', 'Overcast☁️')
             except Exception as e:
                 payload = 'Sorry, an error occurred. Please try again later.'
                 loggingmod.logger.error(e, exc_info=True)
