@@ -86,7 +86,7 @@ def condition_hourly(location):
     # _ret = '{}, {}, {}\n{} {}°c {} RH {}\n'.format(day_week, dd, loc_full, hhmm, temp_c, weather, rh)
     _ret = ('{} as of {} {}\n'.format(loc_full, hhmm, tz) +
             '{}℃  {}  feels like {}℃\n'.format(temp_c, weather, feelslike) +
-            'precip {}㎜  RH {}%  UV Index {} of 10\n'.format(precip, rh, uv))
+            'precip {}㎜  RH {}  UV Index {} of 10\n'.format(precip if precip != '--' else 0, rh, uv))
 
     # for hourly
     now_hour = int(hhmm[:2])
@@ -140,7 +140,7 @@ def condition_hourly(location):
         _prev_cond = _cond
 
         # add to return text
-        _ret += '{} {}°c{}\n'.format(_hour, _cel, ___cond)
+        _ret += '{} {}℃{}\n'.format(_hour, _cel, ___cond)
 
         _count -= 1
 
