@@ -16,7 +16,7 @@ url_conditions_korea = 'http://api.wunderground.com/api/{}/conditions/q/KR/{}.js
 url_conditions_not_korea = 'http://api.wunderground.com/api/{}/conditions/q/{}.json'
 url_hourly = 'http://api.wunderground.com/api/{}/hourly/q/{}.json'
 url_forecast = 'http://api.wunderground.com/api/{}/forecast/q/{}.json'
-url_forecast10day = 'http://api.wunderground.com/api/{}/forecast10day/q/{}}.json'
+url_forecast10day = 'http://api.wunderground.com/api/{}/forecast10day/q/{}.json'
 
 # Wunderground API key
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
