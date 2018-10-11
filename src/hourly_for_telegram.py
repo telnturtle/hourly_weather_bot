@@ -7,11 +7,12 @@ import nalssi
 import loggingmod
 
 
-PREV_LOCS = dict() # { chat_id: previous_location }
+PREV_LOCS = dict()  # { chat_id: previous_location }
 try:
-    with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), encoding='utf-8') as data_file:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), encoding='utf-8') as data_file:
         PREV_LOCS = dict(json.load(data_file))
-except Exception as e: loggingmod.logger.warning(e)
+except Exception as e:
+    loggingmod.logger.warning(e)
 
 
 def make_payload(chat_id, text):
@@ -31,10 +32,12 @@ def make_payload(chat_id, text):
 def update(chat_id, location):
     PREV_LOCS[chat_id] = location
     try:
-        with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), 'w', encoding='utf-8') as make_file:
-            json.dump(list(PREV_LOCS.items()), make_file, ensure_ascii=False, indent='\t')
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), 'w', encoding='utf-8') as make_file:
+            json.dump(list(PREV_LOCS.items()), make_file,
+                      ensure_ascii=False, indent='\t')
     except Exception as e:
-        loggingmod.logger.warning("Error at update({}, {})".format(chat_id, location))
+        loggingmod.logger.warning(
+            "Error at update({}, {})".format(chat_id, location))
         loggingmod.logger.warning(e)
 
 

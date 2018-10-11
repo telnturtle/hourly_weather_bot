@@ -1,12 +1,13 @@
 def main():
-    
+
     import os
     import sys
-    sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+    sys.path.append(os.path.dirname(
+        os.path.abspath(os.path.dirname(__file__))))
 
     import datetime
     from datetime import timedelta
-    
+
     import time
     import telepot
     from telepot.loop import MessageLoop
@@ -14,7 +15,6 @@ def main():
     from src import hourly_for_telegram
 
     import loggingmod
-
 
     def start_msg():
         return '''
@@ -46,7 +46,6 @@ You can use the previous location by entering a period. e.g.
 마침표 하나를 입력해 이전과 똑같은 위치를 사용할 수 있습니다.
 예) .
 '''
-
 
     def command_msg():
         return '''
@@ -89,20 +88,18 @@ About...
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
             try:
                 payload = hourly_for_telegram.make_payload(chat_id, text)
-                payload = payload
-                    .replace('Rain', 'Rain☔' )
-                    .replace('Thunderstorm', 'Thunderstorm⛈')
-                    .replace('Cloudy', 'Cloudy☁️')
-                    .replace('Clouds', 'Clouds☁️')
-                    .replace('Clear', 'Clear☀️')
-                    .replace('Overcast', 'Overcast☁️')
+                payload = (payload.replace('Rain', 'Rain☔')
+                           .replace('Thunderstorm', 'Thunderstorm⛈')
+                           .replace('Cloudy', 'Cloudy☁️')
+                           .replace('Clouds', 'Clouds☁️')
+                           .replace('Clear', 'Clear☀️')
+                           .replace('Overcast', 'Overcast☁️'))
             except Exception as e:
                 payload = 'Sorry, an error occurred. Please try again later.'
                 loggingmod.logger.error(e, exc_info=True)
             send_msg(bot, chat_id, payload)
 
-
-    with open(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'rsc', '_keys', 'keys'), 'r') as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
         TOKEN = f.readlines()[9][:-1]
 
     bot = telepot.Bot(TOKEN)
@@ -117,8 +114,8 @@ About...
             loggingmod.logger.error(e, exc_info=True)
 
         _count = _count - 1
-        if _count < 1: break
-
+        if _count < 1:
+            break
 
     # Keep the program running.
     while 1:

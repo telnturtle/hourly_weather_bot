@@ -7,10 +7,13 @@ logger = logging.getLogger()
 
 logger.setLevel(logging.INFO)
 
-filepath = os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', '_log', 'stream', 'stream')
-fileHandler = logging.handlers.TimedRotatingFileHandler(filename=filepath, when='midnight', interval=1, encoding='utf-8', utc=True, atTime=datetime.time(hour=0))
+filepath = os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), '..', '_log', 'stream', 'stream')
+fileHandler = logging.handlers.TimedRotatingFileHandler(
+    filename=filepath, when='midnight', interval=1, encoding='utf-8', utc=True, atTime=datetime.time(hour=0))
 
-fomatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s') # fomatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+# fomatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+fomatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 
 fileHandler.setFormatter(fomatter)
 
