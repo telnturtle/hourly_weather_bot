@@ -116,7 +116,7 @@ def condition_hourly(location):
         _weekday = hourly['FCTTIME']['weekday_name_abbrev']     # weekday
         # unixtime UTC+0
         _epoch = int(hourly['FCTTIME']['epoch'])
-        _cel = _round(hourly['temp']['metric'])                 # celcious temp
+        _cel = round(float(hourly['temp']['metric']))           # celcious temp
         _cond = hourly['condition']                             # condition
 
         # only 0, 6, 9, ..., 21 o clock
@@ -151,6 +151,7 @@ def condition_hourly(location):
     return _ret
 
 
+# 이 함수는 구현이 업데이트되지 않았으며 condition_hourly 기준으로 맞춰야 한다
 def condition_forecast(location):
     '''Condition + forecast'''
     # 한국어 위치를 시군 단위의 영어 이름으로 바꾼다. 영어 단어면 바꾸지 않는다.
