@@ -18,32 +18,18 @@ def main():
 
     def start_msg():
         return '''
-Weatherbot forecasts hourly weather.
 /help to see help message.
-
-매 시간 날씨를 예보하는 봇입니다.
-/help 를 입력하여 도움말을 볼 수 있습니다.
 '''
 
     def help_msg():
         return '''
-You can enter the location to see the forecast. e.g
-  san francisco ca
-  tokyo japan
-  london uk
-  hongkong
-
-You can use the previous location by entering a period. e.g.
-  .
-
-위치로 지역 이름을 입력하면 해당 예보를 출력합니다.
-예) 서울
-    판암역
-    인천 논현동
+지역을 입력하세요.
+예) 온수동
+    인천논현
     경북대
-    첨단동
+    오사카
 
-마침표 하나를 입력해 이전과 똑같은 위치를 사용할 수 있습니다.
+마침표 하나를 입력해 이전과 똑같은 지역을 쓸 수 있습니다.
 예) .
 '''
 
@@ -95,7 +81,8 @@ About...
                            .replace('Clear', 'Clear☀️')
                            .replace('Overcast', 'Overcast☁️'))
             except Exception as e:
-                payload = 'Sorry, an error occurred. Please try again later.'
+                payload = '일치하는 검색결과가 없습니다.'
+                # payload = 'Sorry, an error occurred. Please try again later.'
                 loggingmod.logger.error(e, exc_info=True)
             send_msg(bot, chat_id, payload)
 

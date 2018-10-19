@@ -12,8 +12,16 @@ from bs4 import BeautifulSoup
 import json
 
 
-def weather(loc):
-
+def weather(loc=''):
+    '''
+    > python .\google_weather.py
+    Traceback (most recent call last):
+    File ".\google_weather.py", line 59, in <module>
+        weather('ㄱㄴㅇㅣㅏㅈㄱㄴㅇ자ㄱㅇㄴ')
+    File ".\google_weather.py", line 44, in weather
+        filter(lambda s: 'wobist' in s.text, script))[0].text
+    IndexError: list index out of range
+    '''
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
     }
@@ -55,3 +63,4 @@ def weather(loc):
          for h in three_hours]
     )
     print(ret)
+    return ret
