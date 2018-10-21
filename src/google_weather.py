@@ -1,6 +1,5 @@
 def ampm_to_24(s):
     '''오후 7:00 -> 19:00, 오전 7:00 -> 7:00'''
-    print('s:', s)
     ss = s.split(' ')
     if ss[0] == '오후':
         return ':'.join([str(int(ss[1].split(':')[0])+12), ss[1].split(':')[1]])
@@ -28,7 +27,8 @@ def weather(loc=''):
     IndexError: list index out of range
     '''
     headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
+        'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3'
     }
     html_text = requests.get(
         "https://www.google.co.kr/search?q={}+날씨&aqs=chrome..69i57.3675j0j1&sourceid=chrome&ie=UTF-8".format(loc), headers=headers).text
