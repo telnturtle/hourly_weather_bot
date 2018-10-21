@@ -11,6 +11,17 @@ def ampm_to_24(s):
         return ':'.join([str(int(ss[0].split(':')[0])), ss[0].split(':')[1]])
 
 
+def reduce_day(day): return '(' + day[1] + ')'  # (일요일) -> (일)
+
+
+def hhmm_to_hh(hhmm): return ('0' + hhmm[:-3])[-2:]  # 01:00, 10:00 -> 01, 10
+
+
+def reduce_time(time): return (reduce_day(time.split(' ')[0]) +
+                               ' ' +
+                               ampm_to_24(' '.join(time.split(' ')[1:])))
+
+
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -60,12 +71,11 @@ def weather(loc=''):
     three_hours = list_of_dict_celcious[::3][1:9]
 
     ret = '\n'.join(
-        ['{}  {}  {}  {}℃'.format(loc.text, time.text, cond.text, tm.text),
-            '강수확률 {}  습도 {}  풍속 {}'.format(pp.text, hm.text, ws.text)]
+        ['{}  {}  {}  {}℃'.format(loc.text, reduce_time(time.text), cond.text, tm.text),
+            '강수 {}  습도 {}  풍속 {}'.format(pp.text, hm.text, ws.text)]
         +
         ['{}  {}  {}℃'.format(
-            ampm_to_24(' '.join((h['dts'].split(' ')[1:]))), h['c'], h['tm'])
+            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['c'], h['tm'])
          for h in three_hours]
     )
-    print(ret)
     return ret
