@@ -2,13 +2,13 @@ def ampm_to_24(s):
     '''오후 7:00 -> 19:00, 오전 7:00 -> 7:00'''
     ss = s.split(' ')
     if ss[0] == '오후':
-        return ':'.join([str(int(ss[1].split(':')[0])+12), ss[1].split(':')[1]])
+        return ':'.join([str(int(ss[1].split(':')[0])+(12 if int(ss[1].split(':')[0]) % 12 != 0 else 0)), ss[1].split(':')[1]])
     elif ss[0] == '오전':
-        return ':'.join([str(int(ss[1].split(':')[0])), ss[1].split(':')[1]])
+        return ':'.join([str(int(ss[1].split(':')[0])+(0 if int(ss[1].split(':')[0]) % 12 != 0 else -12)), ss[1].split(':')[1]])
     elif ss[1] == 'PM':
-        return ':'.join([str(int(ss[0].split(':')[0])+12), ss[0].split(':')[1]])
+        return ':'.join([str(int(ss[0].split(':')[0])+(12 if int(ss[0].split(':')[0]) % 12 != 0 else 0)), ss[0].split(':')[1]])
     elif ss[1] == 'AM':
-        return ':'.join([str(int(ss[0].split(':')[0])), ss[0].split(':')[1]])
+        return ':'.join([str(int(ss[0].split(':')[0])+(0 if int(ss[0].split(':')[0]) % 12 != 0 else -12)), ss[0].split(':')[1]])
 
 
 def reduce_day(day): return '(' + day[1] + ')'  # (일요일) -> (일)
