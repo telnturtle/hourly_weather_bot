@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 import json
 
 
-def weather(loc=''):
+def weather(loc='', period=3, nol=8):
     '''
     > python .\google_weather.py
     Traceback (most recent call last):
@@ -68,7 +68,7 @@ def weather(loc=''):
         filter(lambda s: 'wobist' in s.text, script))[0].text
     list_of_dict_celcious = json.loads(including_script_text[
         including_script_text.find('wobhl":')+7:including_script_text.find('wobist')-2])[::1]  # changed from 2
-    three_hours = list_of_dict_celcious[::3][1:9]
+    three_hours = list_of_dict_celcious[::period][1:nol+1]
 
     ret = '\n'.join(
         ['{}  {}  {}  {}℃'.format(loc.text, reduce_time(time.text), cond.text, tm.text),
