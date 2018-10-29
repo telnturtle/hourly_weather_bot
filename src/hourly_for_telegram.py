@@ -6,6 +6,7 @@ import json
 import google_weather
 # import nalssi
 import loggingmod
+import traceback
 
 
 PREV_LOCS = dict()  # { chat_id: previous_location }
@@ -13,7 +14,8 @@ try:
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), encoding='utf-8') as data_file:
         PREV_LOCS = dict(json.load(data_file))
 except Exception as e:
-    loggingmod.logger.warning(e)
+    # loggingmod.logger.warning(e)
+    traceback.print_exc()
 
 
 def make_payload(chat_id, text):
@@ -39,9 +41,10 @@ def update(chat_id, location):
             json.dump(list(PREV_LOCS.items()), make_file,
                       ensure_ascii=False, indent='\t')
     except Exception as e:
-        loggingmod.logger.warning(
-            "Error at update({}, {})".format(chat_id, location))
-        loggingmod.logger.warning(e)
+        # loggingmod.logger.warning(
+        #     "Error at update({}, {})".format(chat_id, location))
+        # loggingmod.logger.warning(e)
+        traceback.print_exc()
 
 
 def previous_location(chat_id):

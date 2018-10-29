@@ -98,7 +98,8 @@ def condition_hourly(location):
 
     # None if Wunderground API dead
     if hourly_data is None:
-        loggingmod.logger.info("hourly_data is None")
+        # loggingmod.logger.info("hourly_data is None")
+        print('hourly_data is None')
         return _ret
 
     # _count lines hourly forecast
@@ -121,13 +122,13 @@ def condition_hourly(location):
 
         # only 0, 6, 9, ..., 21 o clock
         if not int(_hour) in [0, 6, 9, 12, 15, 18, 21]:
-            loggingmod.logger.info(
-                '_hour = {}: Time interval: continue'.format(_hour))
+            # loggingmod.logger.info(
+            #     '_hour = {}: Time interval: continue'.format(_hour))
             continue
 
         # forecast must be 1 hour later than cdcooe
         if _epoch < 3600 + cdcooe:
-            loggingmod.logger.info('_hour = {}: epoch < now'.format(_hour))
+            # loggingmod.logger.info('_hour = {}: epoch < now'.format(_hour))
             continue
 
         # first next day -> write date and weekday
@@ -235,6 +236,7 @@ def condition_forecast(location):
         _ret += _fcttext_metric
     except Exception as e:
         loggingmod.logger.warning(e)
+        traceback.print_exc()
         # TODO: try-except 없애기
 
     return _ret

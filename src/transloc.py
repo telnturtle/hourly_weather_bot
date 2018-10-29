@@ -95,5 +95,6 @@ def si_gun(location):
                 result = _s["level1"][:2]  # level1 -> "서울특별시", "대전광역시"
             return result
     except Exception as e:
-        loggingmod.logger.warning("Error at si_gun({})".format(location))
+        # loggingmod.logger.warning("Error at si_gun({})".format(location))
+        print("Error at si_gun({})".format(location))
         return None

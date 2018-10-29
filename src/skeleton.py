@@ -15,6 +15,7 @@ def main():
     from src import hourly_for_telegram
 
     import loggingmod
+    import traceback
 
     def start_msg():
         return '''
@@ -48,7 +49,12 @@ About...
 
     def send_msg(bot, chat_id, msg):
         bot.sendMessage(chat_id, msg)
-        loggingmod.logger.info('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
+        # loggingmod.logger.info('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
+        #     chat_id,
+        #     datetime.datetime.now().isoformat(' ')[:19],
+        #     (datetime.datetime.now() + timedelta(hours=9)).isoformat(' ')[:19],
+        #     msg))
+        print('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
             chat_id,
             datetime.datetime.now().isoformat(' ')[:19],
             (datetime.datetime.now() + timedelta(hours=9)).isoformat(' ')[:19],
@@ -83,7 +89,8 @@ About...
             except Exception as e:
                 payload = '일치하는 검색결과가 없습니다.'
                 # payload = 'Sorry, an error occurred. Please try again later.'
-                loggingmod.logger.error(e, exc_info=True)
+                # loggingmod.logger.error(e, exc_info=True)
+                traceback.print_exc()
             send_msg(bot, chat_id, payload)
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
@@ -94,11 +101,13 @@ About...
     while 1:
         try:
             MessageLoop(bot, handle).run_as_thread(allowed_updates='message')
-            loggingmod.logger.info('Listening ...')
+            # loggingmod.logger.info('Listening ...')
+            print('Listening ...')
             while 1:
                 time.sleep(5)
         except Exception as e:
-            loggingmod.logger.error(e, exc_info=True)
+            # loggingmod.logger.error(e, exc_info=True)
+            traceback.print_exc()
 
         _count = _count - 1
         if _count < 1:
