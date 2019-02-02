@@ -8,7 +8,7 @@ import traceback
 
 import wunderground
 import transloc
-import loggingmod
+# import loggingmod
 
 
 def condition_hourly(location):
@@ -235,7 +235,7 @@ def condition_forecast(location):
         _fcttext_metric = forecast_data['forecast']['txt_forecast']['forecastday'][0]['fcttext_metric']
         _ret += _fcttext_metric
     except Exception as e:
-        loggingmod.logger.warning(e)
+        # loggingmod.logger.warning(e)
         traceback.print_exc()
         # TODO: try-except 없애기
 

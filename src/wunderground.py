@@ -7,7 +7,7 @@ import time
 import os
 import traceback
 
-import loggingmod
+# import loggingmod
 
 # Init
 
@@ -78,8 +78,8 @@ def condition(location, is_korean=False):
         _diff = time_now - call_per_minute.get_nowait()
         if 1*60 - 2 > _diff:
             _sleepsec = 1*60 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(
-                _sleepsec), datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(
+                # _sleepsec), datetime.now().isoformat(' ')[:19])
 
             time.sleep(_sleepsec)
             time_now = int(time.time())
@@ -91,8 +91,8 @@ def condition(location, is_korean=False):
         _diff = time_now - call_per_24h.get_nowait()
         if 1*60*60*24 - 2 > _diff:
             _sleepsec = 1*60*60*24 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
-                                      datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
+                                    #   datetime.now().isoformat(' ')[:19])
 
             # 이 시간이 너무 길어지면 큰일이나지만 아직 24시간에
             # 500콜이나 들어온 적이 없으므로 그냥 냅둠
@@ -149,8 +149,8 @@ def hourly(location, is_korean=False):
         _diff = time_now - call_per_minute.get_nowait()
         if 1*60 - 2 > _diff:
             _sleepsec = 1*60 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(
-                _sleepsec), datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(
+                # _sleepsec), datetime.now().isoformat(' ')[:19])
 
             time.sleep(_sleepsec)
             time_now = int(time.time())
@@ -162,8 +162,8 @@ def hourly(location, is_korean=False):
         _diff = time_now - call_per_24h.get_nowait()
         if 1*60*60*24 - 2 > _diff:
             _sleepsec = 1*60*60*24 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
-                                      datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
+                                    #   datetime.now().isoformat(' ')[:19])
 
             # 이 시간이 너무 길어지면 큰일이나지만 아직 24시간에
             # 500콜이나 들어온 적이 없으므로 그냥 냅둠
@@ -181,7 +181,7 @@ def hourly(location, is_korean=False):
     try:
         data = json.loads(response.text)
     except Exception as e:
-        loggingmod.logger.warning(e)  # 디버깅좀
+        # loggingmod.logger.warning(e)  # 디버깅좀
         return None
 
     # data_hourly 딕셔너리에 저장한다
@@ -221,8 +221,8 @@ def forecast(self, location):
         _diff = time_now - call_per_minute.get_nowait()
         if 1*60 - 2 > _diff:
             _sleepsec = 1*60 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(
-                _sleepsec), datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(
+                # _sleepsec), datetime.now().isoformat(' ')[:19])
 
             time.sleep(_sleepsec)
             time_now = int(time.time())
@@ -234,8 +234,8 @@ def forecast(self, location):
         _diff = time_now - call_per_24h.get_nowait()
         if 1*60*60*24 - 2 > _diff:
             _sleepsec = 1*60*60*24 - _diff
-            loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
-                                      datetime.now().isoformat(' ')[:19])
+            # loggingmod.logger.warning('Sleep {}s... at'.format(_sleepsec),
+                                    #   datetime.now().isoformat(' ')[:19])
 
             # 이 시간이 너무 길어지면 큰일이나지만 아직 24시간에
             # 500콜이나 들어온 적이 없으므로 그냥 냅둠

@@ -5,7 +5,7 @@ import json
 
 import google_weather
 # import nalssi
-import loggingmod
+# import loggingmod
 import traceback
 
 

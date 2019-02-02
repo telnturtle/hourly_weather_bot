@@ -14,7 +14,7 @@ def main():
 
     from src import hourly_for_telegram
 
-    import loggingmod
+    # import loggingmod
     import traceback
 
     def start_msg():

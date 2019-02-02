@@ -8,7 +8,7 @@ import time
 import os
 import traceback
 
-import loggingmod
+# import loggingmod
 
 
 # Init
