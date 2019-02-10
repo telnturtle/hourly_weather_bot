@@ -1,12 +1,11 @@
+import traceback
+# import loggingmod
+# import nalssi
+import google_weather
+import json
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
-import json
-
-import google_weather
-# import nalssi
-# import loggingmod
-import traceback
 
 
 PREV_LOCS = dict()  # { chat_id: previous_location }
@@ -20,16 +19,17 @@ except Exception as e:
 
 def make_payload(chat_id, text):
     if text == '.':
-        return google_weather.weather(previous_location(chat_id))
-        # return nalssi.condition_hourly(previous_location(chat_id))
+        payload = google_weather.weather(previous_location(chat_id))
+        # payload = nalssi.condition_hourly(previous_location(chat_id))
     elif len(text) > 255:
-        return 'You called with a very long location.'
+        payload = 'You called with a very long location.'
 
-    # payload = nalssi.condition_hourly(text)
-    payload = google_weather.weather(text)
+    else:
+        payload = google_weather.weather(text)
+        # payload = nalssi.condition_hourly(text)
 
-    if not (payload.startswith('위치(') or payload.startswith('City Not Found')):
-        update(chat_id, text)
+        if not (payload.startswith('위치(') or payload.startswith('City Not Found')):
+            update(chat_id, text)
 
     return payload
 

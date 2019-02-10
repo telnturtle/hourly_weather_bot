@@ -1,3 +1,10 @@
+import json
+from bs4 import BeautifulSoup
+import requests
+
+
+# aux functions
+
 def ampm_to_24(s):
     '''오후 7:00 -> 19:00, 오전 7:00 -> 7:00'''
     ss = s.split(' ')
@@ -22,10 +29,7 @@ def reduce_time(time): return (reduce_day(time.split(' ')[0]) +
                                ampm_to_24(' '.join(time.split(' ')[1:])))
 
 
-import requests
-from bs4 import BeautifulSoup
-import json
-
+# exports
 
 def weather(loc='', period=3, nol=8):
     '''
@@ -65,14 +69,14 @@ def weather(loc='', period=3, nol=8):
     # print(ws.text)
     script = soup.find_all('script')
     including_script_text = list(
-        filter(lambda s: 'wobist' in s.text, script))[0].text
+        filter(lambda s: 'wobist' in s.text, script))[0].text.encode('ascii', 'backslashreplace').decode('unicode-escape')
     list_of_dict_celcious = json.loads(including_script_text[
         including_script_text.find('wobhl":')+7:including_script_text.find('wobist')-2])[::1]  # changed from 2
     three_hours = list_of_dict_celcious[::period][1:nol+1]
 
     ret = '\n'.join(
         ['{}  {}  {}  {}℃'.format(loc.text, reduce_time(time.text), cond.text, tm.text),
-            '강수 {}  습도 {}  풍속 {}'.format(pp.text, hm.text, ws.text)]
+            '눈비 {}  습도 {}  바람 {}'.format(pp.text, hm.text, ws.text)]
         +
         ['{}  {}  {}℃'.format(
             hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['c'], h['tm'])
