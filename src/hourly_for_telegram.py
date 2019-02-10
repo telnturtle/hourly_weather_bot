@@ -1,11 +1,12 @@
-import traceback
-# import loggingmod
-# import nalssi
-import google_weather
-import json
-import sys
 import os
-sys.path.append(os.path.dirname(__file__))
+import sys
+import json
+import traceback
+if True:
+    sys.path.append(os.path.dirname(__file__))
+    import google_weather
+    # import loggingmod
+    # import nalssi
 
 
 PREV_LOCS = dict()  # { chat_id: previous_location }
