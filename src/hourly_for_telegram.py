@@ -5,6 +5,7 @@ import traceback
 if True:
     sys.path.append(os.path.dirname(__file__))
     import google_weather
+    import google_aq
     # import loggingmod
     # import nalssi
 
