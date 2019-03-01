@@ -19,19 +19,30 @@ except Exception as e:
     traceback.print_exc()
 
 
-def make_payload(chat_id, text):
+def make_payload(chat_id, text, aq=False):
     if text == '.':
-        payload = google_weather.weather(previous_location(chat_id))
+        if aq:
+            payload = (google_weather.weather(previous_location(chat_id)), google_aq.aq(previous_location(chat_id)))
+        else:
+            payload = google_weather.weather(previous_location(chat_id))
         # payload = nalssi.condition_hourly(previous_location(chat_id))
     elif len(text) > 255:
         payload = 'You called with a very long location.'
 
     else:
-        payload = google_weather.weather(text)
+        if aq:
+            payload = (google_weather.weather(text), google_aq.aq(text))
+        else:
+            payload = google_weather.weather(text)
+            
         # payload = nalssi.condition_hourly(text)
 
-        if not (payload.startswith('위치(') or payload.startswith('City Not Found')):
-            update(chat_id, text)
+        if aq:
+            if not (payload[0].startswith('위치(') or payload[0].startswith('City Not Found')):
+                update(chat_id, text)
+        else:
+            if not (payload.startswith('위치(') or payload.startswith('City Not Found')):
+                update(chat_id, text)
 
     return payload
 

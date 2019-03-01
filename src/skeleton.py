@@ -79,7 +79,7 @@ About...
 
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
             try:
-                payload = hourly_for_telegram.make_payload(chat_id, text)
+                payload = hourly_for_telegram.make_payload(chat_id, text, True)
                 payload = (payload.replace('Rain', 'Rain☔')
                            .replace('Thunderstorm', 'Thunderstorm⛈')
                            .replace('Cloudy', 'Cloudy☁️')
