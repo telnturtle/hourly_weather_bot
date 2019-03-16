@@ -92,10 +92,9 @@ def weather(loc='', period=3, nol=8):
           '눈비 {} 습도 {} 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
     _prev = ''
     for h in period_hours:
-        _repeated = h['c'] != _prev
-        c = h['c'] if _repeated else '〃'
+        _repeated = h['c'] == _prev
+        c = '〃' if _repeated else h['c']
         _prev = _prev if _repeated else h['c']
-        print(_repeated, _prev, h['c'])
         ss.append('{} {}℃ {}'.format(
             hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['tm'], c))
 
