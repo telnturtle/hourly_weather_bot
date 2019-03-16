@@ -5,10 +5,7 @@ import requests
 
 # exports
 
-def aq(loc='', period=3, nol=8):
-    '''
-
-    '''
+def get_google(loc):
     KEYWORD = '공기질'  # '미세먼지'
 
     headers = {
@@ -19,32 +16,41 @@ def aq(loc='', period=3, nol=8):
         "https://www.google.co.kr/search?q={}+{}&aqs=chrome..69i57.3675j0j1&sourceid=chrome&ie=UTF-8".format(loc, KEYWORD), headers=headers).text
     soup = BeautifulSoup(html_text, 'html.parser')
 
-    loc = soup.find('div', {'class': 'ha9jJe gsrt'})
+    loc = soup.find('div', {'class': 'ha9jJe gsrt'}).text
     status = {
-        'level': soup.find('div', {'class': 'dGcunf gsrt'}),
-        'message': soup.find('div', {'class': 'Us3eld'})
+        'level': soup.find('div', {'class': 'dGcunf gsrt'}).text,
+        'message': soup.find('div', {'class': 'Us3eld'}).text.split('.')[0] + '.'
     }
     major_pollutant = {
-        'text': soup.find('span', {'class': 'j9f4tb'}),
-        'type': soup.find('span', {'class': 'TFBdJd'}),
-        'value': soup.find('div', {'class': 'uULQNc'})
+        'text': soup.find('span', {'class': 'j9f4tb'}).text,
+        'type': soup.find('span', {'class': 'TFBdJd'}).text,
+        'value': soup.find('div', {'class': 'uULQNc'}).text
     }
     info = {
-        'index': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span'),
-        'time_message': soup.find('span', {'class': 'Q6owNe'}).find_next_sibling('span'),
+        'index': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span').text,
+        'time_message': soup.find('span', {'class': 'Q6owNe'}).find_next_sibling('span').text[:-3],
         # from 교체필요
-        'from': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span')
+        'from': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span').text
     }
+    return {'KEYWORD': KEYWORD, 'loc': loc, 'status': status, 'major_pollutant': major_pollutant, 'info': info}
+
+
+def aq(loc='', period=3, nol=8):
+    '''
+    Google air quality search
+    '''
+
+    texts = get_google(loc)
 
     res = '\n'.join([
-        '{} {}'.format(loc.text, KEYWORD),
-        '{}({}), {}'.format(
-            status['level'].text, info['index'].text, major_pollutant['value'].text),
+        '{}, {}'.format(texts['loc'], texts['info']['time_message']),
+        '{}: {}({})'.format(
+            texts['info']['index'], texts['status']['level'], texts['major_pollutant']['value']),
         '{} {}'.format(
-            major_pollutant['text'].text, major_pollutant['type'].text),
-        '',
-        '{}'.format(status['message'].text),
-        '',
-        '{}. {}'.format(info['time_message'].text, info['from'].text)
+            texts['major_pollutant']['text'], texts['major_pollutant']['type']),
+        # '',
+        '{}'.format(texts['status']['message']),
+        # '',
+        # '{}. {}'.format(, texts['info']['from'])
     ])
     return res
