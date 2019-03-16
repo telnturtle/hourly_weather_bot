@@ -18,20 +18,29 @@ def ampm_to_24(s):
         return ':'.join([str(int(ss[0].split(':')[0])+(0 if int(ss[0].split(':')[0]) % 12 != 0 else -12)), ss[0].split(':')[1]])
 
 
-def reduce_day(day): return '(' + day[1] + ')'  # (일요일) -> (일)
+def reduce_day(day):
+    '''`'(일요일)'`` -> `'(일)'`'''
+    return '(' + day[1] + ')'
 
 
-def hhmm_to_hh(hhmm): return ('0' + hhmm[:-3])[-2:]  # 01:00, 10:00 -> 01, 10
+def reduce_day_long(day):
+    '''`'(일요일)'` -> `'일요일'`'''
+    return day[1:-1]
 
 
-def reduce_time(time): return (reduce_day(time.split(' ')[0]) +
+def hhmm_to_hh(hhmm):
+    """`'01:00'`, `'10:00'` -> `'01'`, `'10'`"""
+    return ('0' + hhmm[:-3])[-2:]
+
+
+def reduce_time(time): return (reduce_day_long(time.split(' ')[0]) +
                                ' ' +
                                ampm_to_24(' '.join(time.split(' ')[1:])))
 
 
 # exports
 
-def weather(loc='', period=3, nol=8):
+def get_google(loc):
     '''
     > python .\google_weather.py
     Traceback (most recent call last):
@@ -53,33 +62,41 @@ def weather(loc='', period=3, nol=8):
 
     soup = BeautifulSoup(html_text, 'html.parser')
 
-    loc = soup.find(id='wob_loc')
-    # print(loc.text)
-    time = soup.find(id='wob_dts')
-    # print(time.text)
-    cond = soup.find(id='wob_dc')
-    # print(cond.text)
-    tm = soup.find(id='wob_tm')
-    # print(tm.text)
-    pp = soup.find(id='wob_pp')
-    # print(pp.text)
-    hm = soup.find(id='wob_hm')
-    # print(hm.text)
-    ws = soup.find(id='wob_ws')
-    # print(ws.text)
+    loc = soup.find(id='wob_loc').text
+    time = soup.find(id='wob_dts').text
+    cond = soup.find(id='wob_dc').text
+    tm = soup.find(id='wob_tm').text
+    pp = soup.find(id='wob_pp').text
+    hm = soup.find(id='wob_hm').text
+    ws = soup.find(id='wob_ws').text[:-3] + '㎧'
     script = soup.find_all('script')
     including_script_text = list(
         filter(lambda s: 'wobist' in s.text, script))[0].text.encode('ascii', 'backslashreplace').decode('unicode-escape')
-    list_of_dict_celcious = json.loads(including_script_text[
-        including_script_text.find('wobhl":')+7:including_script_text.find('wobist')-2])[::1]  # changed from 2
-    three_hours = list_of_dict_celcious[::period][1:nol+1]
 
-    ret = '\n'.join(
-        ['{}  {}  {}  {}℃'.format(loc.text, reduce_time(time.text), cond.text, tm.text),
-            '눈비 {}  습도 {}  바람 {}'.format(pp.text, hm.text, ws.text)]
-        +
-        ['{}  {}  {}℃'.format(
-            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['c'], h['tm'])
-         for h in three_hours]
-    )
-    return ret
+    return {
+        'loc': loc, 'time': time, 'condition': cond, 'temp': tm, 'pp': pp, 'humidity': hm, 'windspeed': ws, 'script-wrap': including_script_text
+    }
+
+
+def weather(loc='', period=3, nol=8):
+    '''period(hour), nol: # of line'''
+    texts = get_google(loc)
+
+    list_of_dict_celcious = json.loads(texts['script-wrap'][texts['script-wrap'].find(
+        'wobhl":')+7:texts['script-wrap'].find('wobist')-2])[::1]  # changed from 2
+    period_hours = list_of_dict_celcious[::period][1:nol+1]
+
+    ss = ['{}'.format(texts['loc']),
+          '{} {}℃ {}'.format(reduce_time(
+              texts['time']), texts['temp'],  texts['condition']),
+          '눈비 {} 습도 {} 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
+    _prev = ''
+    for h in period_hours:
+        _repeated = h['c'] != _prev
+        c = h['c'] if _repeated else '〃'
+        _prev = _prev if _repeated else h['c']
+        print(_repeated, _prev, h['c'])
+        ss.append('{} {}℃ {}'.format(
+            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['tm'], c))
+
+    return '\n'.join(ss)
