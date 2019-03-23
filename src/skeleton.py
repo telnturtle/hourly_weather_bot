@@ -93,7 +93,8 @@ About...
                 # loggingmod.logger.error(e, exc_info=True)
                 traceback.print_exc()
             send_msg(bot, chat_id, payload0)
-            send_msg(bot, chat_id, payload1)
+            if payload0 != '일치하는 검색결과가 없습니다.':
+                send_msg(bot, chat_id, payload1)
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
         TOKEN = f.readlines()[9][:-1]
