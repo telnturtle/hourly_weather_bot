@@ -68,7 +68,7 @@ def get_google(loc):
     tm = soup.find(id='wob_tm').text
     pp = soup.find(id='wob_pp').text
     hm = soup.find(id='wob_hm').text
-    ws = soup.find(id='wob_ws').text[:-3] + '㎧'
+    ws = int(float(soup.find(id='wob_ws').text[:-4]) /36 * 10) + '㎧'
     script = soup.find_all('script')
     including_script_text = list(
         filter(lambda s: 'wobist' in s.text, script))[0].text.encode('ascii', 'backslashreplace').decode('unicode-escape')
