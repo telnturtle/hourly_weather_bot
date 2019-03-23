@@ -79,19 +79,21 @@ About...
 
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
             try:
-                payload = hourly_for_telegram.make_payload(chat_id, text, True)
-                payload = (payload.replace('Rain', 'Rain☔')
-                           .replace('Thunderstorm', 'Thunderstorm⛈')
-                           .replace('Cloudy', 'Cloudy☁️')
-                           .replace('Clouds', 'Clouds☁️')
-                           .replace('Clear', 'Clear☀️')
-                           .replace('Overcast', 'Overcast☁️'))
+                [payload0, payload1] = hourly_for_telegram.make_payload(
+                    chat_id, text, True)
+                payload0 = (payload0.replace('Rain', 'Rain☔')
+                            .replace('Thunderstorm', 'Thunderstorm⛈')
+                            .replace('Cloudy', 'Cloudy☁️')
+                            .replace('Clouds', 'Clouds☁️')
+                            .replace('Clear', 'Clear☀️')
+                            .replace('Overcast', 'Overcast☁️'))
             except Exception as e:
-                payload = '일치하는 검색결과가 없습니다.'
+                payload0 = '일치하는 검색결과가 없습니다.'
                 # payload = 'Sorry, an error occurred. Please try again later.'
                 # loggingmod.logger.error(e, exc_info=True)
                 traceback.print_exc()
-            send_msg(bot, chat_id, payload)
+            send_msg(bot, chat_id, payload0)
+            send_msg(bot, chat_id, payload1)
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
         TOKEN = f.readlines()[9][:-1]

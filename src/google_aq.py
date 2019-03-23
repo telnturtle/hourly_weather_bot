@@ -35,7 +35,7 @@ def get_google(loc):
     return {'KEYWORD': KEYWORD, 'loc': loc, 'status': status, 'major_pollutant': major_pollutant, 'info': info}
 
 
-def aq(loc='', period=3, nol=8):
+def aq(loc=''):
     '''
     Google air quality search
     '''

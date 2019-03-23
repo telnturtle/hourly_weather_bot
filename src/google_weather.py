@@ -88,7 +88,7 @@ def weather(loc='', period=3, nol=8):
 
     ss = ['{}'.format(texts['loc']),
           '{} {}℃ {}'.format(reduce_time(
-              texts['time']), texts['temp'],  texts['condition']),
+              texts['time']), texts['temp'], texts['condition']),
           '눈비 {} 습도 {} 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
     _prev = ''
     for h in period_hours:
