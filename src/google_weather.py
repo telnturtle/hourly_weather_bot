@@ -1,6 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 import requests
+import google_aq
 
 
 # aux functions
@@ -38,6 +39,20 @@ def reduce_time(time): return (reduce_day_long(time.split(' ')[0]) +
                                ampm_to_24(' '.join(time.split(' ')[1:])))
 
 
+def aux_weekday_to_dict(soup_object):
+    weekday = soup_object.find(class_='vk_lgy').text
+
+    div_list = soup_object.find_all('div')
+    weather = div_list[1].find('img')['alt']
+    # high_temp = div_list[2].find(class_='vk_gy')
+    # print('high_temp')
+    # print(high_temp)
+    high = div_list[2].find(class_='vk_gy').find_all('span')[0].text
+    low = div_list[2].find(class_='vk_lgy').find_all('span')[0].text
+
+    return {'weekday': weekday, 'weather': weather, 'high': high, 'low': low}
+
+
 # exports
 
 def get_google(loc):
@@ -68,20 +83,43 @@ def get_google(loc):
     tm = soup.find(id='wob_tm').text
     pp = soup.find(id='wob_pp').text
     hm = soup.find(id='wob_hm').text
-    ws = str(int(float(soup.find(id='wob_ws').text[:-4]) / 36 * 10)) + '㎧'
+    # AB test ('3㎧')
+    # A
+    ws = soup.find(id='wob_ws').text[:-3] + '㎧'
+    # B
+    # ws = str(int(float(soup.find(id='wob_ws').text[:-4]) / 36 * 10)) + '㎧'
+    # /AB test
     script = soup.find_all('script')
     including_script_text = list(
         filter(lambda s: 'wobist' in s.text, script))[0].text.encode('ascii', 'backslashreplace').decode('unicode-escape')
 
+    week = list(map(aux_weekday_to_dict, soup.find(
+        id="wob_dp").find_all(class_="wob_df")))
+
     return {
-        'loc': loc, 'time': time, 'condition': cond, 'temp': tm, 'pp': pp, 'humidity': hm, 'windspeed': ws, 'script-wrap': including_script_text
+        'loc': loc, 'time': time, 'condition': cond, 'temp': tm, 'pp': pp, 'humidity': hm, 'windspeed': ws, 'script-wrap': including_script_text, 'week': week
     }
 
 
-def weather(loc='', period=3, nol=8):
-    '''period(hour), nol: # of line'''
-    texts = get_google(loc)
+def hourly_daily(loc='', period=3, nol=8, daily=False):
+    google_result = get_google(loc)
 
+    ret = [hourly(google_result, period, nol)]
+    return ret.append([daily(google_result['week'])]) if daily else ret
+
+
+def aux_daily(week):
+    '''weekday, weather, high, low'''
+    weekday, weather, high, low = week.values()  # depends on order of week
+    return '{}: {} {}/{}℃'.format(weekday, weather, high, low)
+
+
+def daily(week):
+    return '\n'.join(map(aux_daily, week))
+
+
+def hourly(texts, period, nol):
+    '''hourly. period(hour), nol: # of line'''
     list_of_dict_celcious = json.loads(texts['script-wrap'][texts['script-wrap'].find(
         'wobhl":')+7:texts['script-wrap'].find('wobist')-2])[::1]  # changed from 2
     period_hours = list_of_dict_celcious[::period][1:nol+1]

@@ -19,23 +19,23 @@ def main():
 
     def start_msg():
         return '''
-/help to see help message.
+지역별 날씨를 예보합니다. 지역을 입력해주세요.
+마침표 하나만 입력해서 이전 지역을 다시 사용할 수 있습니다.
+
+/help 로 도움말을 볼 수 있습니다.
+Bot command list:
+/start
+/help
+/command
+/about
 '''
 
     def help_msg():
         return '''
-지역을 입력하세요.
-예) 온수동
-    인천논현
-    경북대
-    오사카
+지역별 날씨를 예보합니다. 지역을 입력해주세요.
+마침표 하나만 입력해서 이전 지역을 다시 사용할 수 있습니다.
 
-마침표 하나를 입력해 이전과 똑같은 지역을 쓸 수 있습니다.
-예) .
-'''
-
-    def command_msg():
-        return '''
+Bot command list:
 /start
 /help
 /command
@@ -44,7 +44,9 @@ def main():
 
     def about_msg():
         return '''
-About...
+Hourly Weather Bot
+
+@telnturtle || telnturtle@gmail.com
 '''
 
     def send_msg(bot, chat_id, msg):
@@ -60,41 +62,43 @@ About...
             (datetime.datetime.now() + timedelta(hours=9)).isoformat(' ')[:19],
             msg))
 
-    def handle(msg):
-        content_type, chat_type, chat_id = telepot.glance(msg)
-        time_diff = time.time() - msg['date']
+    def handle(msg_):
+        content_type, chat_type, chat_id = telepot.glance(msg_)
+        time_diff = time.time() - msg_['date']
         time_diff_limit = 60
-        text = msg['text']
+        text = msg_['text']
 
         if content_type == 'text' and text.startswith('/'):
             if text == '/start':
                 send_msg(bot, chat_id, start_msg())
-                send_msg(bot, chat_id, help_msg())
             elif text == '/help':
                 send_msg(bot, chat_id, help_msg())
-            elif text == '/command':
-                send_msg(bot, chat_id, command_msg())
             elif text == '/about':
                 send_msg(bot, chat_id, about_msg())
 
         if content_type == 'text' and time_diff_limit > time_diff and not text.startswith('/'):
+
+            # 'Sorry, an error occurred. Please try again later.'
+            NO_RESULT_MSG = '일치하는 검색결과가 없습니다.'
+
             try:
-                [payload0, payload1] = hourly_for_telegram.make_payload(
-                    chat_id, text, True)
-                payload0 = (payload0.replace('Rain', 'Rain☔')
-                            .replace('Thunderstorm', 'Thunderstorm⛈')
-                            .replace('Cloudy', 'Cloudy☁️')
-                            .replace('Clouds', 'Clouds☁️')
-                            .replace('Clear', 'Clear☀️')
-                            .replace('Overcast', 'Overcast☁️'))
+                payload_list = hourly_for_telegram.make_payload(
+                    chat_id, text, aq=True, daily=True)
+                # for weather.com only
+                # payload_list[0] = (payload_list[0].replace('Rain', 'Rain☔')
+                #                    .replace('Thunderstorm', 'Thunderstorm⛈')
+                #                    .replace('Cloudy', 'Cloudy☁️')
+                #                    .replace('Clouds', 'Clouds☁️')
+                #                    .replace('Clear', 'Clear☀️')
+                #                    .replace('Overcast', 'Overcast☁️'))
             except Exception as e:
-                payload0 = '일치하는 검색결과가 없습니다.'
-                # payload = 'Sorry, an error occurred. Please try again later.'
+                payload_list[0] = NO_RESULT_MSG
                 # loggingmod.logger.error(e, exc_info=True)
                 traceback.print_exc()
-            send_msg(bot, chat_id, payload0)
-            if payload0 != '일치하는 검색결과가 없습니다.':
-                send_msg(bot, chat_id, payload1)
+
+            send_msg(bot, chat_id, payload_list[0])
+            for msg_ in payload_list[1:] if payload_list[0] != NO_RESULT_MSG else []:
+                send_msg(bot, chat_id, msg_)
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_keys', 'keys'), 'r') as f:
         TOKEN = f.readlines()[9][:-1]

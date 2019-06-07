@@ -19,32 +19,30 @@ except Exception as e:
     traceback.print_exc()
 
 
-def make_payload(chat_id, text, aq=False):
+def make_payload(chat_id, text, aq=False, daily=False):
+    location = None
+
+    # . means previous location; default is seoul
     if text == '.':
-        if aq:
-            payload = (google_weather.weather(previous_location(chat_id)), google_aq.aq(previous_location(chat_id)))
-        else:
-            payload = google_weather.weather(previous_location(chat_id))
-        # payload = nalssi.condition_hourly(previous_location(chat_id))
+        location = previous_location(chat_id)
+
+    # too long location called
     elif len(text) > 255:
-        payload = 'You called with a very long location.'
+        return ['You called with a very long location.']
 
+    # normal case
     else:
-        if aq:
-            payload = (google_weather.weather(text), google_aq.aq(text))
-        else:
-            payload = google_weather.weather(text)
-            
-        # payload = nalssi.condition_hourly(text)
+        location = text
 
-        if aq:
-            if not (payload[0].startswith('위치(') or payload[0].startswith('City Not Found')):
-                update(chat_id, text)
-        else:
-            if not (payload.startswith('위치(') or payload.startswith('City Not Found')):
-                update(chat_id, text)
+    # payload_list: [hourly] or [h,, air quality] or [h., daily] or [h., aq., d.]
+    payload_list = google_weather.hourly_daily(location, daily=daily)
+    if aq:
+        payload_list.insert(1, google_aq.aq(location))
 
-    return payload
+    # if no exception raised then
+    update(chat_id, text)
+
+    return payload_list
 
 
 def update(chat_id, location):

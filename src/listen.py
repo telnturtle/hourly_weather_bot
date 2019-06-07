@@ -1,5 +1,6 @@
 import google_weather
 import google_aq
+import print_exception
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -34,9 +35,11 @@ while True:
             # # A
             # print(nalssi.condition_hourly(s))
             # B
-            print(google_weather.weather(s))
-            print(google_aq.aq(s))
+            # print(google_weather.weather(s))
+            # print(google_aq.aq(s))
+            # C
+            print(google_weather.hourly_daily(s))
         except Exception as e:
-            print(e)
+            print_exception.print_()
             print(cannot_text)
     print()

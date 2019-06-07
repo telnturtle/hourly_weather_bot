@@ -29,7 +29,7 @@ def get_google(loc):
     info = {
         'index': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span').text,
         'time_message': soup.find('span', {'class': 'Q6owNe'}).find_next_sibling('span').text[:-3],
-        # from 교체필요
+        # TODO: from 교체필요
         'from': soup.find('span', {'class': 'zN28Re'}).find_next_sibling('span').text
     }
     return {'KEYWORD': KEYWORD, 'loc': loc, 'status': status, 'major_pollutant': major_pollutant, 'info': info}
