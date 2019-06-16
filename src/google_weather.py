@@ -105,16 +105,20 @@ def hourly_daily(loc='', period=3, nol=8, daily=False):
     google_result = get_google(loc)
 
     ret = [hourly(google_result, period, nol)]
-    return ret.append([daily(google_result['week'])]) if daily else ret
+    print('ret')
+    print(ret)
+    if daily:
+        ret.append(daily_(google_result['week']))
+    return ret
 
 
 def aux_daily(week):
     '''weekday, weather, high, low'''
-    weekday, weather, high, low = week.values()  # depends on order of week
-    return '{}: {} {}/{}℃'.format(weekday, weather, high, low)
+    # python 버전이 다르니까 dictionary 순서가 사전순정렬 / 입력순서 두개로 나뉘어진다 ㅠ
+    return '{}: {} {}/{}℃'.format(week['weekday'], week['weather'], week['high'], week['low'])
 
 
-def daily(week):
+def daily_(week):
     return '\n'.join(map(aux_daily, week))
 
 

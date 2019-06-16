@@ -80,6 +80,7 @@ Hourly Weather Bot
 
             # 'Sorry, an error occurred. Please try again later.'
             NO_RESULT_MSG = '일치하는 검색결과가 없습니다.'
+            payload_list = []
 
             try:
                 payload_list = hourly_for_telegram.make_payload(
@@ -92,7 +93,7 @@ Hourly Weather Bot
                 #                    .replace('Clear', 'Clear☀️')
                 #                    .replace('Overcast', 'Overcast☁️'))
             except Exception as e:
-                payload_list[0] = NO_RESULT_MSG
+                payload_list.insert(0, NO_RESULT_MSG)
                 # loggingmod.logger.error(e, exc_info=True)
                 traceback.print_exc()
 
