@@ -6,7 +6,7 @@ import requests
 # exports
 
 def get_google(loc):
-    KEYWORD = '공기질'  # '미세먼지'
+    KEYWORD = '미세먼지'  # '미세먼지' or '공기질'
 
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
