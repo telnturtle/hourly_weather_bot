@@ -85,9 +85,9 @@ def get_google(loc):
     hm = soup.find(id='wob_hm').text
     # AB test ('3㎧')
     # A
-    ws = soup.find(id='wob_ws').text[:-3] + '㎧'
+    # ws = soup.find(id='wob_ws').text[:-3] + '㎧'
     # B
-    # ws = str(int(float(soup.find(id='wob_ws').text[:-4]) / 36 * 10)) + '㎧'
+    ws = str(round(float(soup.find(id='wob_ws').text[:-4]) / 36 * 10)) + '㎧'
     # /AB test
     script = soup.find_all('script')
     including_script_text = list(
@@ -105,8 +105,7 @@ def hourly_daily(loc='', period=3, nol=8, daily=False):
     google_result = get_google(loc)
 
     ret = [hourly(google_result, period, nol)]
-    print('ret')
-    print(ret)
+
     if daily:
         ret.append(daily_(google_result['week']))
     return ret
@@ -129,15 +128,16 @@ def hourly(texts, period, nol):
     period_hours = list_of_dict_celcious[::period][1:nol+1]
 
     ss = ['{}'.format(texts['loc']),
-          '{} {}℃ {}'.format(reduce_time(
-              texts['time']), texts['temp'], texts['condition']),
-          '눈비 {} 습도 {} 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
+          '{} {} {}℃'.format(reduce_time(
+              texts['time']), texts['condition'], texts['temp']),
+          '눈비 {}, 습도 {}, 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
     _prev = ''
     for h in period_hours:
         _repeated = h['c'] == _prev
         c = '〃' if _repeated else h['c']
         _prev = _prev if _repeated else h['c']
-        ss.append('{} {}℃ {}'.format(
-            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), h['tm'], c))
+        ss.append('{}시: {} {}℃'.format(
+            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), c, h['tm']))
 
     return '\n'.join(ss)
+
