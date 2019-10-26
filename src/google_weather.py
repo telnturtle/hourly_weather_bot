@@ -140,4 +140,3 @@ def hourly(texts, period, nol):
             hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), c, h['tm']))
 
     return '\n'.join(ss)
-
