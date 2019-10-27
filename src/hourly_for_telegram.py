@@ -10,15 +10,6 @@ if True:
     # import nalssi
 
 
-PREV_LOCS = dict()  # { chat_id: previous_location }
-try:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), encoding='utf-8') as data_file:
-        PREV_LOCS = dict(json.load(data_file))
-except Exception as e:
-    # loggingmod.logger.warning(e)
-    traceback.print_exc()
-
-
 def make_payload(chat_id, text, aq=False, daily=False):
     location = None
 
@@ -49,24 +40,3 @@ def make_payload(chat_id, text, aq=False, daily=False):
         update(chat_id, text)
 
     return payload_list
-
-
-def update(chat_id, location):
-    PREV_LOCS[chat_id] = location
-    try:
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'rsc', '_jsons', 'PREV_LOCS.json'), 'w', encoding='utf-8') as make_file:
-            json.dump(list(PREV_LOCS.items()), make_file,
-                      ensure_ascii=False, indent='\t')
-    except Exception as e:
-        # loggingmod.logger.warning(
-        #     "Error at update({}, {})".format(chat_id, location))
-        # loggingmod.logger.warning(e)
-        traceback.print_exc()
-
-
-def previous_location(chat_id):
-    if chat_id in PREV_LOCS:
-        return PREV_LOCS[chat_id]
-    else:
-        update(chat_id, 'Seoul')
-        return PREV_LOCS[chat_id]
