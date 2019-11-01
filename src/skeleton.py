@@ -1,7 +1,9 @@
+from src import hourly_for_telegram
 import datetime
 import json
 from telepot.loop import MessageLoop
 import os
+from functools import reduce
 import sys
 import telepot
 import time
@@ -10,87 +12,84 @@ import traceback
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-from src import hourly_for_telegram
 
 # telegram prev called location by each user
 
 PREV_LOCS = dict()  # { chat_id: previous_location }
 try:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
-                           'rsc', '_jsons', 'PREV_LOCS.json'),
-              encoding='utf-8') as data_file:
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                        'rsc', '_jsons', 'PREV_LOCS.json')
+    with open(path, encoding='utf-8') as data_file:
         PREV_LOCS = dict(json.load(data_file))
 except Exception as e:
     # loggingmod.logger.warning(e)
     traceback.print_exc()
 
-# telegram functons
 
+# # telegram functons
 
-def update(chat_id, location):
+def update_previous_location(chat_id, location):
     PREV_LOCS[chat_id] = location
 
-
-try:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
-                           'rsc', '_jsons', 'PREV_LOCS.json'),
-              'w',
-              encoding='utf-8') as make_file:
-        json.dump(list(PREV_LOCS.items()),
-                  make_file,
-                  ensure_ascii=False,
-                  indent='\t')
-except Exception as e:
-    # loggingmod.logger.warning(
-    #     "Error at update({}, {})".format(chat_id, location))
-    # loggingmod.logger.warning(e)
-    traceback.print_exc()
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                               'rsc', '_jsons', 'PREV_LOCS.json'),
+                  'w',
+                  encoding='utf-8') as make_file:
+            json.dump(list(PREV_LOCS.items()),
+                      make_file,
+                      ensure_ascii=False,
+                      indent='\t')
+    except Exception:
+        traceback.print_exc()
 
 
-def previous_location(chat_id):
+def get_previous_location(chat_id):
     if chat_id in PREV_LOCS:
         return PREV_LOCS[chat_id]
     else:
-        update(chat_id, 'Seoul')
+        update_previous_location(chat_id, 'Seoul')
         return PREV_LOCS[chat_id]
 
 
-# message functions
+# # message functions
 
+COMMAND_LIST = ['start', 'help', 'command', 'about']
 
-def start_msg():
-    return '''
+START_MSG = '''
 지역별 날씨를 예보합니다. 지역을 입력해주세요.
 마침표 하나만 입력해서 이전 지역을 다시 사용할 수 있습니다.
 
 /help 로 도움말을 볼 수 있습니다.
 Bot command list:
-/start
-/help
-/command
-/about
-'''
+''' + (reduce(lambda acc, val: '%s\n/%s' % (acc, val), COMMAND_LIST))
 
-
-def help_msg():
-    return '''
+HELP_MSG = '''
 지역별 날씨를 예보합니다. 지역을 입력해주세요.
 마침표 하나만 입력해서 이전 지역을 다시 사용할 수 있습니다.
 
 Bot command list:
-/start
-/help
-/command
-/about
+''' + (reduce(lambda acc, val: '%s\n/%s' % (acc, val), COMMAND_LIST))
+
+
+ABOUT_MSG = '''
+Hourly Weather Bot by @telnturtle
+
+telnturtle@gmail.com
 '''
 
 
-def about_msg():
-    return '''
-Hourly Weather Bot
-
-@telnturtle || telnturtle@gmail.com
-'''
+def message_by_command(command):
+    if command == 'start':
+        return START_MSG
+    elif command == 'help':
+        return HELP_MSG
+    elif command == 'command':
+        return (reduce(lambda acc, val: '%s\n/%s' % (acc, val), COMMAND_LIST))
+    elif command == 'about':
+        return ABOUT_MSG
+    else:
+        return None
 
 
 def send(bot, chat_id, msg):
@@ -99,52 +98,75 @@ def send(bot, chat_id, msg):
     print('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' %
           (chat_id, now.isoformat(' ')[:19],
            (now + timedelta(hours=9)).isoformat(' ')[:19], msg))
-    # print('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n' % (
-    #     chat_id, now.isoformat(' ')[:19], (now + timedelta(hours=9)).isoformat(' ')[:19], msg))
-    # print('chat_id: %s\nGMT    : %s\nKST    : %s\npayload: %s\n'
-    #       % (chat_id, now.isoformat(' ')[:19],
-    #          (now + timedelta(hours=9)).isoformat(' ')[:19],
-    #          msg))
+
+
+# # aux functions
+
+def is_previous_location(text):
+    '''. means previous location'''
+    return text == '.'
+
+
+def is_content_text(content_type):
+    return content_type == 'text'
+
+
+def is_text_command(text):
+    return text.startswith('/')
+
+
+def is_time_over(date):
+    return time.time() - date > 60  # unit: second
 
 
 def main():
-    def handle(msg):
+
+    def handle(payload):
         content_type, chat_type, chat_id, msg_date, _ = telepot.glance(
-            msg, long=True)
-        text = msg['text']
+            payload, long=True)
+        text = payload['text']
 
         # conditions
-        is_text = content_type == 'text'
-        is_command = msg['text'].startswith('/')
-        is_timeover = time.time() - msg_date > 60  # unit: second
+        is_text = is_content_text(content_type)
+        is_command = is_text_command(payload['text'])
+        is_timeover = is_time_over(msg_date)
 
-        if is_text and is_command:
-            if text == '/start':
-                send(bot, chat_id, start_msg())
-            elif text == '/help':
-                send(bot, chat_id, help_msg())
-            elif text == '/about':
-                send(bot, chat_id, about_msg())
+        if not is_text:
+            return
 
-        if is_text and not is_timeover and not is_command:
+        if is_command:
+            message = message_by_command(text[1:])
+            if message:
+                send(bot, chat_id, message)
 
+        elif is_timeover and not is_command:
+
+            # make query
+            is_previous_location_used = is_previous_location(text)
+            query = (get_previous_location(chat_id)
+                     if is_previous_location_used else text)
+
+            # make payload
             # 'Sorry, an error occurred. Please try again later.'
             NO_RESULT_MSG = '일치하는 검색결과가 없습니다.'
             payload_list = []
 
             try:
                 payload_list = hourly_for_telegram.make_payload(chat_id,
-                                                                text,
+                                                                query,
                                                                 aq=True,
                                                                 daily=True)
-            except Exception as e:
-                payload_list.insert(0, NO_RESULT_MSG)
+            except Exception:
+                payload_list = [NO_RESULT_MSG]
                 traceback.print_exc()
 
-            send(bot, chat_id, payload_list[0])
-            for msg in payload_list[
-                    1:] if payload_list[0] != NO_RESULT_MSG else []:
-                send(bot, chat_id, msg)
+            # send
+            for payload in payload_list:
+                send(bot, chat_id, payload)
+
+            # update previous location
+            if not is_previous_location_used:
+                update_previous_location(chat_id, text)
 
     # run
 
