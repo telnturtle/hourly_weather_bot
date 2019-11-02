@@ -139,7 +139,7 @@ def main():
             if message:
                 send(bot, chat_id, message)
 
-        elif is_timeover and not is_command:
+        elif not is_timeover and not is_command:
 
             # make query
             is_previous_location_used = is_previous_location(text)

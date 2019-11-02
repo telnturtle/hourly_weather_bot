@@ -34,9 +34,15 @@ def hhmm_to_hh(hhmm):
     return ('0' + hhmm[:-3])[-2:]
 
 
-def reduce_time(time): return (reduce_day_long(time.split(' ')[0]) +
-                               ' ' +
-                               ampm_to_24(' '.join(time.split(' ')[1:])))
+def ampmhhmm_to_ampmhhsi(ampmhhmm):
+    """`'오전 01:00'`, `'오전 10:00'` -> `'오전 1'`, `'오전 1'`"""
+    return '%s%s' % (ampmhhmm[:-3], '시')
+
+
+def reduce_time(time):
+    return (reduce_day(time.split(' ')[0]) +
+            ' ' +
+            ' '.join(time.split(' ')[1:]))
 
 
 def aux_weekday_to_dict(soup_object):
@@ -53,7 +59,17 @@ def aux_weekday_to_dict(soup_object):
     return {'weekday': weekday, 'weather': weather, 'high': high, 'low': low}
 
 
+def velocity_to_kph(vel):
+    '''xm/s or xkm/h -> x㎧'''
+    if vel.endswith('km/h'):
+        return '%s%s' % (vel[:-4], 'kph')
+    else:
+        return str(round(float(vel[:-3]) / 10 * 37)) + 'kph'
+    # kph or ㎧
+
+
 # exports
+
 
 def get_google(loc):
     '''
@@ -87,7 +103,7 @@ def get_google(loc):
     # A
     # ws = soup.find(id='wob_ws').text[:-3] + '㎧'
     # B
-    ws = str(round(float(soup.find(id='wob_ws').text[:-4]) / 36 * 10)) + '㎧'
+    ws = velocity_to_kph(soup.find(id='wob_ws').text)
     # /AB test
     script = soup.find_all('script')
     including_script_text = list(
@@ -114,7 +130,7 @@ def hourly_daily(loc='', period=3, nol=8, daily=False):
 def aux_daily(week):
     '''weekday, weather, high, low'''
     # python 버전이 다르니까 dictionary 순서가 사전순정렬 / 입력순서 두개로 나뉘어진다 ㅠ
-    return '{}: {} {}/{}℃'.format(week['weekday'], week['weather'], week['high'], week['low'])
+    return '{}: {}ㆍ{}–{}℃'.format(week['weekday'], week['weather'], week['high'], week['low'])
 
 
 def daily_(week):
@@ -127,16 +143,17 @@ def hourly(texts, period, nol):
         'wobhl":')+7:texts['script-wrap'].find('wobist')-2])[::1]  # changed from 2
     period_hours = list_of_dict_celcious[::period][1:nol+1]
 
-    ss = ['{}'.format(texts['loc']),
-          '{} {} {}℃'.format(reduce_time(
-              texts['time']), texts['condition'], texts['temp']),
-          '눈비 {}, 습도 {}, 바람 {}'.format(texts['pp'], texts['humidity'], texts['windspeed'])]
+    ss = ['{}ㆍ{}'.format(reduce_time(texts['time']), texts['loc']),
+          ('{}ㆍ{}℃ㆍ풍속 {}ㆍ강수확률 {}ㆍ습도 {}'
+           .format(texts['condition'],
+                   texts['temp'], texts['windspeed'], texts['pp'], texts['humidity']))
+          ]
     _prev = ''
     for h in period_hours:
         _repeated = h['c'] == _prev
         c = '〃' if _repeated else h['c']
         _prev = _prev if _repeated else h['c']
-        ss.append('{}시: {} {}℃'.format(
-            hhmm_to_hh(ampm_to_24(' '.join((h['dts'].split(' ')[1:])))), c, h['tm']))
+        ss.append('{}: {}ㆍ{}℃'.format(
+            ampmhhmm_to_ampmhhsi(' '.join((h['dts'].split(' ')[1:]))), c, h['tm']))
 
     return '\n'.join(ss)
